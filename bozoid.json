@@ -1,0 +1,12 @@
+{
+	"master": {
+		"name": "Montiey",
+		"discriminator": "2214"
+	},
+	"names": [
+		"boz",
+		"bozoid"
+	],
+	"game": "thanoscar",
+	"cmdPref": "$"
+}
