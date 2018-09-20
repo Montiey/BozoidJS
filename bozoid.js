@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
-let bozoid = JSON.parse(fs.readFileSync('bozoid.json'));
-let token = JSON.parse(fs.readFileSync('token.json')).token;
-let vocabulary = JSON.parse(fs.readFileSync('vocabulary.json'));
+var bozoid = JSON.parse(fs.readFileSync('bozoid.json'));
+var token = JSON.parse(fs.readFileSync('private/token.json')).token;
+var vocabulary = JSON.parse(fs.readFileSync('private/vocabulary.json'));
 client.on('ready', () => {
 	client.user.setPresence({ game: { name: bozoid.game }, status: 'offline' });
 	console.log("Ready: " + client.user.tag);
