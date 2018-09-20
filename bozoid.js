@@ -1,9 +1,23 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
-var bozoid = JSON.parse(fs.readFileSync('bozoid.json'));
-var token = JSON.parse(fs.readFileSync('private/token.json')).token;
-var vocabulary = JSON.parse(fs.readFileSync('private/vocabulary.json'));
+
+const configPath = "bozoid.json";
+const tokenPath = "private/token.json";
+const vocabularyPath = "private/vocabulary.json";
+
+var bozoid = JSON.parse(fs.readFileSync(configPath));
+var token = JSON.parse(fs.readFileSync(tokenPath)).token;
+try{
+	var vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
+} catch(e){
+	vocabulary = {
+		"list": [
+			"wow"
+		]
+	}
+}
+
 client.on('ready', () => {
 	client.user.setPresence({ game: { name: bozoid.game }, status: 'offline' });
 	console.log("Ready: " + client.user.tag);
@@ -12,10 +26,14 @@ client.on('ready', () => {
 client.on('message', msg => {
 	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
 	
+	if(isCmd(msg.content, 0, "ping")){
+		msg.channel.send("Pong!");
+	}
+	
 	//
 	
 	
-	if(isCmd(msg.content, 0, "spam") && !msg.author.bot){
+	if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
 		for(var i = 0; i < getArg(msg.content, 1); i++){
 			msg.channel.send(getArg(msg.content, 2));
 		}
@@ -23,7 +41,7 @@ client.on('message', msg => {
 	
 	//
 	
-	if(isCmd(msg.content, 0, "say") && !msg.author.bot){
+	if(isCmd(msg.content, 0, "say") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
 		msg.channel.send(getArgs(msg.content, 1));
 	}
 
@@ -46,7 +64,7 @@ client.on('message', msg => {
 
 		if(vocabulary.list.indexOf(word) == -1){
 			vocabulary.list.push(word);
-			fs.writeFileSync('vocabulary.json', JSON.stringify(vocabulary, null, 4));
+			fs.writeFileSync(vocabularyPath, JSON.stringify(vocabulary, null, 4));
 			msg.channel.send("Added to vocabulary: " + word);
 		} else{
 			console.log("already");
