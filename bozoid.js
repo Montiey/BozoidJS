@@ -26,7 +26,7 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "say") && !msg.author.bot){
 		msg.channel.send(getArgs(msg.content, 1));
 	}
-	
+
 	//
 	
 	if(!msg.author.bot){
@@ -43,7 +43,7 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "add") && !msg.author.bot && getArgs(msg.content, 1) != null){
 		var word = getArgs(msg.content, 1);
 		console.log("got: " + word);
-		
+
 		if(vocabulary.list.indexOf(word) == -1){
 			vocabulary.list.push(word);
 			fs.writeFileSync('vocabulary.json', JSON.stringify(vocabulary, null, 4));
@@ -51,6 +51,13 @@ client.on('message', msg => {
 		} else{
 			console.log("already");
 		}
+	}
+	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null){
+		var word = getArgs(msg.content, 1);
+		console.log("got to remove: " + word);
+
+		vocabulary.splice(vocabulary.indexOf(word));	//removes the word
+		msg.channel.send("Removed: " + word);
 	}
 	
 });
