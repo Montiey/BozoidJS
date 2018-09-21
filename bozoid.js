@@ -77,7 +77,7 @@ client.on('message', msg => {
 
 	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null){
 		var word = getArgs(msg.content, 1);
-		vocabulary.splice(vocabulary.findIndex(x => x==word);	//removes the word
+		vocabulary.splice(vocabulary.indexOf(word));	//removes the word
 		msg.channel.send("Removed: " + word);
 	}
 	
