@@ -8,5 +8,6 @@
 		"bozoid"
 	],
 	"game": "thanoscar",
-	"cmdPref": "$"
+	"cmdPref": "$",
+	"spamLimit": 20
 }

@@ -26,15 +26,20 @@ client.on('ready', () => {
 client.on('message', msg => {
 	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
 	
+	//
+
 	if(isCmd(msg.content, 0, "ping")){
 		msg.channel.send("Pong!");
 	}
 	
 	//
-	
-	
+		
 	if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
-		for(var i = 0; i < getArg(msg.content, 1); i++){
+		var limit = getArg(msg.content, 1);
+		limit = Math.min(limit, bozoid.spamLimit);
+
+
+		for(var i = 0; i < limit; i++){
 			msg.channel.send(getArg(msg.content, 2));
 		}
 	}
@@ -60,20 +65,18 @@ client.on('message', msg => {
 	
 	if(isCmd(msg.content, 0, "add") && !msg.author.bot && getArgs(msg.content, 1) != null){
 		var word = getArgs(msg.content, 1);
-		console.log("got: " + word);
 
 		if(vocabulary.list.indexOf(word) == -1){
 			vocabulary.list.push(word);
 			fs.writeFileSync(vocabularyPath, JSON.stringify(vocabulary, null, 4));
 			msg.channel.send("Added to vocabulary: " + word);
 		} else{
-			console.log("already");
+			console.log("Phrase already exists");
 		}
 	}
+
 	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null){
 		var word = getArgs(msg.content, 1);
-		console.log("got to remove: " + word);
-
 		vocabulary.splice(vocabulary.indexOf(word));	//removes the word
 		msg.channel.send("Removed: " + word);
 	}
