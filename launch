@@ -1,0 +1,9 @@
+#!/bin/bash
+echo '======== Killing previous instance ========'
+forever stop bozoid.js
+
+#rm /root/.forever/bozoid.out
+#rm /root/.forever/bozoid.err
+rm /root/.forever/bozoid.frv
+
+sudo nohup forever start -a -l /root/.forever/bozoid.frv  bozoid.js > /dev/null &
