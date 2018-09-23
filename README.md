@@ -22,10 +22,11 @@ Included "utilities":
 ---
 
 For you to do:
--add `token.json`
+* add `token.json`
 
-```{
+```
+{
 	"token": "xxxxxxxx"
-}```
-
+}
+```
 
