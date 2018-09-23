@@ -102,6 +102,11 @@ client.on('message', msg => {
 		msg.channel.send("no u");
 	}
 	
+	if(isCmd(msg.content, 0, "restart") || isCmd(msg.content, 0, "reboot")){
+		msg.channel.send("Restarting...");
+		process.exit(0);
+	}
+	
 });
 
 client.on('error', e => {
