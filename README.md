@@ -2,16 +2,12 @@
 
 Montiey's personal Discord Slave
 
-Fully configurable and expandable
-
-Has a sense of humor
-
 A sophisticated connesouir of memes
 
 
 Bozoid will never:
 -Leave you alone
--Respect your friends
+-Ban all your friends
 -Give you up
 -Let you down
 -Run around
@@ -20,8 +16,8 @@ Bozoid will never:
 ---
 
 Included "utilities":
--`launch`: launches Bozoid so that you can close the shell
--`findPIDS`: hacky way to find running instances
+-`launch`: launches Bozoid so that you can close the shell safely
+-`monitor`: shows you all the things
 
 ---
 

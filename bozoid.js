@@ -1,15 +1,17 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
-
 const configPath = "bozoid.json";
 const tokenPath = "private/token.json";
 const vocabularyPath = "private/vocabulary.json";
 
 var bozoid = JSON.parse(fs.readFileSync(configPath));
 var token = JSON.parse(fs.readFileSync(tokenPath)).token;
+
+var vocabulary;
+
 try{
-	var vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
+	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
 } catch(e){
 	vocabulary = {
 		"list": [
@@ -24,14 +26,20 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message. Good practice to make debug logs complete
 	
 	//
 
 	if(isCmd(msg.content, 0, "ping")){
-		msg.channel.send("Pong!");
+		msg.channel.send("Pong! Uptime: `" + (process.uptime() + "").toHHMMSS() + "`");
 	}
-	
+
+	//
+
+	if(isCmd(msg.content, 0, "help")){
+		msg.channel.send("https://www.github.com/Montiey/BozoidJS\nI'm BozoidJS, Bozoid.java's younger, slightly stuipider cousin.");
+	}	
+
 	//
 		
 	if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
@@ -47,6 +55,7 @@ client.on('message', msg => {
 	//
 	
 	if(isCmd(msg.content, 0, "say") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
+		msg.delete(0);
 		msg.channel.send(getArgs(msg.content, 1));
 	}
 
@@ -54,7 +63,7 @@ client.on('message', msg => {
 	
 	if(!msg.author.bot){
 		for(var aka of bozoid.names){
-			if(msg.content.includes(aka) || msg.content == aka){
+			if(msg.content.includes(aka)){
 				msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
 				break;
 			}
@@ -74,24 +83,41 @@ client.on('message', msg => {
 			console.log("Phrase already exists");
 		}
 	}
-
 	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null){
 		var word = getArgs(msg.content, 1);
-		vocabulary.splice(vocabulary.indexOf(word));	//removes the word
-		msg.channel.send("Removed: " + word);
+		var index = 0;
+		for(var value of vocabulary.list){
+			if(value == word){
+				vocabulary.list.splice(index);
+				msg.channel.send("Removed: " + word);
+				break;
+			}
+			index++;
+		};
+	}
+
+	//
+
+	if((msg.content.includes("nou") || msg.content.includes("no u")) && !msg.author.bot){
+		msg.channel.send("no u");
 	}
 	
+});
+
+client.on('error', e => {
+	console.log("discord.js client error:");
+	console.log(e);
 });
 
 client.login(token);
 
 ////////////////
 
-function isCmd(str, index, cmd){
+function isCmd(str, index, cmd){	//Checks if a string contains a prefixed command
 	return getArg(str, index) == (bozoid.cmdPref + cmd);
 }
 
-function getArg(str, index){
+function getArg(str, index){	//Returns the string of an argument at an index
 	var tmpStr = str;
 	for(var i = 0; i < index; i++){
 		while(!tmpStr.startsWith(" ")){
@@ -112,7 +138,7 @@ function getArg(str, index){
 	
 }
 
-function getArgs(str, index){
+function getArgs(str, index){	//Returns the rest of a string after an argument index
 	var tmpIndex = index;
 	var oStr = "";
 	var gotArg = getArg(str, tmpIndex);
@@ -122,4 +148,23 @@ function getArgs(str, index){
 		gotArg = getArg(str, tmpIndex);
 	}
 	return oStr.substring(1);
+}
+
+//	TODO: getArgs(str, startIndex, stopIndex)	//Returns the string of the arguments between two argument indexes
+
+function doStuff(){
+	console.log("Stuff has been done");
+}
+
+String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    var time    = hours+':'+minutes+':'+seconds;
+    return time;
 }
