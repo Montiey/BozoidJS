@@ -1,5 +1,7 @@
 # BozoidJS
 
+[INVITE LINK](https://discordapp.com/oauth2/authorize?client_id=406249641139634178&scope=bot&permissions=8)
+
 Montiey's personal Discord Slave
 
 A sophisticated connesouir of memes
@@ -29,4 +31,3 @@ For you to do:
 	"token": "xxxxxxxx"
 }
 ```
-
