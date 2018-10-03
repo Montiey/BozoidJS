@@ -1,0 +1,26 @@
+{
+  "name": "bozoidjs",
+  "version": "1.0.0",
+  "description": "Montiey's personal Discord Slave",
+  "main": "bozoid.js",
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "forever": "^0.15.3",
+    "jquery": "^3.3.1",
+    "to-zalgo": "^1.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Montiey/BozoidJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Montiey/BozoidJS/issues"
+  },
+  "homepage": "https://github.com/Montiey/BozoidJS#readme"
+}
