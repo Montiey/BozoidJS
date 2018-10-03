@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
+const zalgo = require("to-zalgo");
 const configPath = "bozoid.json";
 const tokenPath = "private/token.json";
 const vocabularyPath = "private/vocabulary.json";
@@ -57,6 +58,11 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "say") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
 		msg.delete(0);
 		msg.channel.send(getArgs(msg.content, 1));
+	}
+	
+	if(isCmd(msg.content, 0, "zalgo") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
+		msg.delete(0);
+		msg.channel.send(zalgo(getArgs(msg.content, 1)));
 	}
 
 	//
