@@ -1,8 +1,6 @@
 #!/bin/bash
 
-echo '======== Process list ========'
+echo '======== Processes ========'
 ps ax | grep -e 'node'
-echo '======== Forever list ======== Kill with: forever stop #PID'
-forever list
 echo '======== Tail bozoid.log ========'
-tail -f /root/.forever/bozoid.frv
+tail -f bozoid.log

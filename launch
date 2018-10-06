@@ -1,7 +1,3 @@
 #!/bin/bash
-
-(while [ $LAST -ne 1]; do
-
-	bozoid.js > /dev/null &
-	let $LAST = $?
-done)
+nohup ./subrun -o > bozoid.out &
+./mon
