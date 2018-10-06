@@ -22,12 +22,12 @@ try{
 }
 
 client.on('ready', () => {
-	client.user.setPresence({ game: { name: bozoid.game }, status: 'offline' });
+	setStatus(bozoid.game, "online");
 	console.log("Ready: " + client.user.tag);
 });
 
 client.on('message', msg => {
-	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message. Good practice to make debug logs complete
+	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message.
 	
 	//
 
@@ -109,8 +109,15 @@ client.on('message', msg => {
 	}
 	
 	if(isCmd(msg.content, 0, "restart") || isCmd(msg.content, 0, "reboot")){
+		setStatus(bozoid.game, "offline");
 		msg.channel.send("Restarting...");
 		process.exit(0);
+	}
+	
+	if(isCmd(msg.content, 0, "shutdown")){
+		setStatus(bozoid.game, "offline");
+		msg.channel.send("Shutting Down...");
+		process.exit(1);
 	}
 	
 });
@@ -123,6 +130,15 @@ client.on('error', e => {
 client.login(token);
 
 ////////////////
+
+function setStatus(var game, var status){
+	client.user.setPresence({
+		game: {
+			name: game
+		},
+		status: status
+	});
+}
 
 function isCmd(str, index, cmd){	//Checks if a string contains a prefixed command
 	return getArg(str, index) == (bozoid.cmdPref + cmd);
