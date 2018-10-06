@@ -10,7 +10,7 @@ do
 	echo "Run..."
 	node bozoid.js
 	
-	$LAST = $?
+	LAST=$?
 	echo "Restarting..."
 	sleep 5
 done
