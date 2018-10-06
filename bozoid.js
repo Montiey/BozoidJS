@@ -131,7 +131,7 @@ client.login(token);
 
 ////////////////
 
-function setStatus(var game, var status){
+function setStatus(game, status){
 	client.user.setPresence({
 		game: {
 			name: game
