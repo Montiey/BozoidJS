@@ -46,8 +46,8 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
 		var limit = getArg(msg.content, 1);
 		limit = Math.min(limit, bozoid.spamLimit);
-
-
+		
+		
 		for(var i = 0; i < limit; i++){
 			msg.channel.send(getArg(msg.content, 2));
 		}
@@ -64,7 +64,7 @@ client.on('message', msg => {
 		msg.delete(0);
 		msg.channel.send(zalgo(getArgs(msg.content, 1)));
 	}
-
+	
 	//
 	
 	if(!msg.author.bot){
