@@ -40,9 +40,9 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "help")){
 		msg.channel.send("https://www.github.com/Montiey/BozoidJS\nI'm BozoidJS, Bozoid.java's younger, slightly stuipider cousin.");
 	}	
-
+	
 	//
-		
+	
 	if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
 		var limit = getArg(msg.content, 1);
 		limit = Math.min(limit, bozoid.spamLimit);
@@ -69,7 +69,7 @@ client.on('message', msg => {
 	
 	if(!msg.author.bot){
 		for(var aka of bozoid.names){
-			if(msg.content.includes(aka)){
+			if(msg.content.toLowerCase().includes(aka.toLowerCase())){
 				msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
 				break;
 			}
