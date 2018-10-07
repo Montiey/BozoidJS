@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
 const zalgo = require("to-zalgo");
+const numberConverter = require("number-to-words");
 const configPath = "bozoid.json";
 const tokenPath = "private/token.json";
 const vocabularyPath = "private/vocabulary.json";
@@ -63,6 +64,30 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "zalgo") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
 		msg.delete(0);
 		msg.channel.send(zalgo(getArgs(msg.content, 1)));
+	}
+	
+	if(isCmd(msg.content, 0, "emote") && getArg(msg.content, 1) != null && !msg.author.bot){
+		var str = getArgs(1).toLowerCase().match(/a-z0-9/).join();
+		console.log("String: " + str);
+		var oStr = "";
+		
+		for(var i = 0; i < str.length; i++){
+			var char = str.charAt(i);
+			if(char === "b"){
+				oStr += ":b:";
+				continue;
+			}
+			if(str.substring(i).startsWith("10")){
+				oStr += ":keycap_ten:";
+				i++;
+				continue;
+			}
+			if(str.charAt(0).isPrototypeOf(number)){
+				console.log("number: " + str.charAt(0) + " " + numberConverter.toWords(parseInt(str.charAt(0))));
+				oStr += numberConverter.toWords(parseInt(str.charAt(0)));
+				continue;
+			}
+		}
 	}
 	
 	//
