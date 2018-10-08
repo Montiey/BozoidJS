@@ -45,6 +45,7 @@ client.on('message', msg => {
 	//
 	
 	if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
+		msg.delete(0);
 		var limit = getArg(msg.content, 1);
 		limit = Math.min(limit, bozoid.spamLimit);
 		
@@ -67,26 +68,35 @@ client.on('message', msg => {
 	}
 	
 	if(isCmd(msg.content, 0, "emote") && getArg(msg.content, 1) != null && !msg.author.bot){
-		var str = getArgs(1).toLowerCase().match(/a-z0-9/).join();
-		console.log("String: " + str);
-		var oStr = "";
+		msg.delete(0);
+		var str = getArgs(msg.content, 1).toLowerCase().match(/[a-z0-9]/g).join("");
+		console.log(str);
 		
+		var oStr = "";
+		var tempNew = "";
 		for(var i = 0; i < str.length; i++){
+			if(tempNew.length <= 2000) oStr = tempNew;
+			
 			var char = str.charAt(i);
-			if(char === "b"){
-				oStr += ":b:";
+			
+			if(char == "b"){
+				tempNew = oStr + ":b:";
 				continue;
 			}
-			if(str.substring(i).startsWith("10")){
-				oStr += ":keycap_ten:";
-				i++;
+			if(!isNaN(char)){
+				tempNew = oStr + ":" + numberConverter.toWords(parseInt(char)) + ":";
 				continue;
 			}
-			if(str.charAt(0).isPrototypeOf(number)){
-				console.log("number: " + str.charAt(0) + " " + numberConverter.toWords(parseInt(str.charAt(0))));
-				oStr += numberConverter.toWords(parseInt(str.charAt(0)));
+			if(isNaN(char)){
+				tempNew = oStr + ":regional_indicator_" + char + ":";
 				continue;
 			}
+		}
+		if(tempNew.length <= 2000) oStr = tempNew;
+		
+		console.log("finished: " + oStr);
+		if(oStr != ""){
+			msg.channel.send(oStr);
 		}
 	}
 	
@@ -131,6 +141,10 @@ client.on('message', msg => {
 
 	if((msg.content.includes("nou") || msg.content.includes("no u")) && !msg.author.bot){
 		msg.channel.send("no u");
+	}
+	
+	if(msg.content.includes("gay") && !msg.author.bot){
+		msg.channel.send("you have the big gay");
 	}
 	
 	if(isCmd(msg.content, 0, "restart") || isCmd(msg.content, 0, "reboot")){
