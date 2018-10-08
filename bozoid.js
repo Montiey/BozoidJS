@@ -70,7 +70,6 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "emote") && getArg(msg.content, 1) != null && !msg.author.bot){
 		msg.delete(0);
 		var str = getArgs(msg.content, 1).toLowerCase().match(/[a-z0-9]/g).join("");
-		console.log(str);
 		
 		var oStr = "";
 		var tempNew = "";
@@ -94,7 +93,6 @@ client.on('message', msg => {
 		}
 		if(tempNew.length <= 2000) oStr = tempNew;
 		
-		console.log("finished: " + oStr);
 		if(oStr != ""){
 			msg.channel.send(oStr);
 		}
