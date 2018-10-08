@@ -127,7 +127,7 @@ client.on('message', msg => {
 		var index = 0;
 		for(var value of vocabulary.list){
 			if(value == word){
-				vocabulary.list.splice(index);
+				vocabulary.list.splice(index, 1);
 				fs.writeFileSync(vocabularyPath, JSON.stringify(vocabulary, null, 4));
 				msg.channel.send("Removed: " + word);
 				break;
