@@ -111,7 +111,7 @@ client.on('message', msg => {
 	
 	//
 	
-	if(isCmd(msg.content, 0, "add") && !msg.author.bot && getArgs(msg.content, 1) != null){
+	if(isCmd(msg.content, 0, "add") && !msg.author.bot && getArgs(msg.content, 1) != null && isMaster(msg)){
 		var word = getArgs(msg.content, 1);
 
 		if(vocabulary.list.indexOf(word) == -1){
@@ -122,12 +122,13 @@ client.on('message', msg => {
 			console.log("Phrase already exists");
 		}
 	}
-	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null){
+	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null && isMaster(msg)){
 		var word = getArgs(msg.content, 1);
 		var index = 0;
 		for(var value of vocabulary.list){
 			if(value == word){
 				vocabulary.list.splice(index);
+				fs.writeFileSync(vocabularyPath, JSON.stringify(vocabulary, null, 4));
 				msg.channel.send("Removed: " + word);
 				break;
 			}
@@ -231,4 +232,11 @@ String.prototype.toHHMMSS = function () {
     if (seconds < 10) {seconds = "0"+seconds;}
     var time    = hours+':'+minutes+':'+seconds;
     return time;
+}
+
+function isMaster(msg){
+	if(msg.author.username === bozoid.master.username && msg.author.discriminator === bozoid.master.discriminator){
+		return true;
+	}
+	return false;
 }
