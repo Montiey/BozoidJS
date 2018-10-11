@@ -138,11 +138,11 @@ client.on('message', msg => {
 
 	//
 
-	if((msg.content.includes("nou") || msg.content.includes("no u")) && !msg.author.bot){
+	if((msg.content.toLowerCase().includes("nou") || msg.content.toLowerCase().includes("no u")) && !msg.author.bot){
 		msg.channel.send("no u");
 	}
 	
-	if(msg.content.includes("gay") && !msg.author.bot){
+	if(msg.content.toLowerCase().includes("gay") && !msg.author.bot){
 		msg.channel.send("you have the big gay");
 	}
 	
