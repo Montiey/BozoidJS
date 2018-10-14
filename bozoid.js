@@ -135,6 +135,10 @@ client.on('message', msg => {
 			index++;
 		};
 	}
+	
+	//
+	if(msg.content.startsWith(".r")) msg.delete(0);
+	if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Scor")) msg.delete(30000);
 
 	//
 
