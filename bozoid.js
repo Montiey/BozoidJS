@@ -181,11 +181,12 @@ client.on('message', msg => {
 
 		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) == null){
 			var oStr = "";
+			var anyInGuild = false;
 			for(var listed of blacklist.users){
 				var targetMember = msg.guild.member(listed.id);
 
 				if(targetMember == null) continue;
-
+				anyInGuild = true;
 				var tempNew = "`" + targetMember.user.username + "#" + targetMember.user.discriminator + " (" + targetMember.user.id + ")`\n";
 
 				if((oStr + tempNew).length > 2000){
@@ -196,8 +197,11 @@ client.on('message', msg => {
 				}
 			}
 
-			if(blacklist.users.length > 0) msg.channel.send(oStr);
-			else msg.channel.send("Everyone is nice :)");
+			if(oStr.length > 0 && anyInGuild){
+				msg.channel.send("Blacklisted users: ");
+				msg.channel.send(oStr);
+			}
+			else msg.channel.send("No users on this guild have been blacklisted");
 		}
 
 		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) != null && isMaster(msg)){
@@ -226,9 +230,9 @@ client.on('message', msg => {
 
 					writeJSON(blacklist, blacklistPath);
 
-					msg.channel.send("`" + targetMember.user.username + "` may no longer use `" + bozoid.cmdPref + "` commands.\nReason: `" + reason + "`");
+					msg.channel.send("`" + targetMember.user.username + "#" + targetMember.user.discriminator + "` may no longer use `" + bozoid.cmdPref + "` commands.\nReason: `" + reason + "`");
 				} else{
-					msg.channel.send("`" + targetMember.user.username + "` has already been blacklisted");
+					msg.channel.send("`" + targetMember.user.username + "` has already been blacklisted.");
 				}
 			}
 		}
@@ -244,7 +248,7 @@ client.on('message', msg => {
 				for(var listed of blacklist.users){
 					if(listed.id === id){
 						blacklist.users.splice(blacklist.users.indexOf(listed), 1);
-						msg.channel.send("`" + targetMember.user.username + "` was removed from the blacklist");
+						msg.channel.send("`" + targetMember.user.username + "#" + targetMember.user.discriminator + "` was removed from the blacklist.");
 					}
 				}
 
@@ -331,10 +335,6 @@ function getArgs(str, index){	//Returns the rest of a string after an argument i
 }
 
 //	TODO: getArgs(str, startIndex, stopIndex)	//Returns the string of the arguments between two argument indexes
-
-function doStuff(){
-	console.log("Stuff has been done");
-}
 
 String.prototype.toHHMMSS = function () {
     var sec_num = parseInt(this, 10); // don't forget the second param
