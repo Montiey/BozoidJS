@@ -6,20 +6,35 @@ const numberConverter = require("number-to-words");
 const configPath = "bozoid.json";
 const tokenPath = "private/token.json";
 const vocabularyPath = "private/vocabulary.json";
+const blacklistPath = "private/blacklist.json";
 
 var bozoid = JSON.parse(fs.readFileSync(configPath));
 var token = JSON.parse(fs.readFileSync(tokenPath)).token;
 
 var vocabulary;
-
 try{
 	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
 } catch(e){
 	vocabulary = {
-		"list": [
-			"wow"
+		list: [
+			"oof"
 		]
-	}
+	};
+}
+
+var blacklist;
+try{
+	blacklist = JSON.parse(fs.readFileSync(blacklistPath));
+} catch(e){
+	blacklist = {
+		users: [
+			{
+				id: "0",
+				by: "nobody",
+				reason: "void"
+			}
+		]
+	};
 }
 
 client.on('ready', () => {
@@ -116,19 +131,20 @@ client.on('message', msg => {
 
 		if(vocabulary.list.indexOf(word) == -1){
 			vocabulary.list.push(word);
-			fs.writeFileSync(vocabularyPath, JSON.stringify(vocabulary, null, 4));
+			writeJSON(vocabulary, vocabularyPath);
 			msg.channel.send("Added to vocabulary: " + word);
 		} else{
 			console.log("Phrase already exists");
 		}
 	}
+	
 	if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null && isMaster(msg)){
 		var word = getArgs(msg.content, 1);
 		var index = 0;
 		for(var value of vocabulary.list){
 			if(value == word){
 				vocabulary.list.splice(index, 1);
-				fs.writeFileSync(vocabularyPath, JSON.stringify(vocabulary, null, 4));
+				writeJSON(vocabulary, vocabularyPath);
 				msg.channel.send("Removed: " + word);
 				break;
 			}
@@ -162,6 +178,82 @@ client.on('message', msg => {
 		process.exit(1);
 	}
 	
+	//
+	
+	if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) == null){
+		var oStr = "";
+		for(var listed of blacklist.users){
+			var targetMember = msg.guild.member(listed.id);
+			
+			if(targetMember == null) continue;
+			
+			var tempNew = "`" + targetMember.user.username + "#" + targetMember.user.discriminator + " (" + targetMember.user.id + ")`\n";
+			
+			if((oStr + tempNew).length > 2000){
+				msg.channel.send(oStr);
+				oStr = tempNew;
+			} else{
+				oStr += tempNew;
+			}
+		}
+		
+		if(oStr.length > 0) msg.channel.send(oStr);
+		else msg.channel.send("Everyone is nice :)");
+		
+	}
+	
+	if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) != null && isMaster(msg)){
+		var targetMember = msg.guild.member(getArg(msg.content, 1).substr(2, 18));	//Discord snowflakes are 18 characters long
+		
+		console.log("id: " + targetMember.id + " of " + targetMember.user.username);
+		
+		if(targetMember != null){
+			var id = targetMember.id;
+			var by = msg.author.id;
+			var reason = getArgs(msg.content, 2);
+			
+			var exists = false;
+			for(var listed of blacklist.users){
+				if(listed.id == id){
+					exists = true;
+				}
+			}
+			
+			if(!exists){
+				blacklist.users.push({
+					id: id,
+					by: by,
+					reason: reason
+				});
+
+				writeJSON(blacklist, blacklistPath);
+
+				msg.channel.send("`" + targetMember.user.username + "` may no longer use `" + bozoid.cmdPref + "` commands.\nReason: `" + reason + "`");
+			} else{
+				msg.channel.send("`" + targetMember.user.username + "` has already been blacklisted");
+			}
+		}
+	}
+	
+	if(isCmd(msg.content, 0, "unblacklist") && isMaster(msg)){
+		var targetMember = msg.guild.member(getArg(msg.content, 1).substr(2, 18));	//Discord snowflakes are 18 characters long
+		
+		console.log("id: " + targetMember.id + " of " + targetMember.user.username);
+		
+		if(targetMember != null){
+			var id = targetMember.id;
+			
+			for(var listed of blacklist.users){
+				if(listed.id === id){
+					blacklist.users.splice(blacklist.users.indexOf(listed), 1);
+					msg.channel.send("`" + targetMember.user.username + "` was removed from the blacklist");
+				}
+			}
+			
+			writeJSON(blacklist, blacklistPath);
+		}
+	}
+	
 });
 
 client.on('error', e => {
@@ -172,6 +264,13 @@ client.on('error', e => {
 client.login(token);
 
 ////////////////
+
+function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
+	var text = JSON.stringify(obj, null, 4);
+	if(text != null){
+		fs.writeFileSync(path, text);
+	}
+}
 
 function setStatus(game, status){
 	client.user.setPresence({
@@ -200,9 +299,13 @@ function getArg(str, index){	//Returns the string of an argument at an index
 	}
 	var EOA = tmpStr.indexOf(" ");	//End of argument index
 	if(EOA >= 0){
-		return tmpStr.substring(0, EOA);	//Excludes next space if index is -1
+		var oStr = tmpStr.substring(0, EOA);	//Excludes next space if index is -1
+		if(oStr.length > 0) return oStr;
+		return null;
 	} else{	//if there are no spaces in the string
-		return tmpStr.substring(0, tmpStr.length);
+		var oStr = tmpStr.substring(0, tmpStr.length);
+		if(oStr.length > 0) return oStr;
+		return null;
 	}
 	
 }
@@ -216,7 +319,9 @@ function getArgs(str, index){	//Returns the rest of a string after an argument i
 		tmpIndex++;
 		gotArg = getArg(str, tmpIndex);
 	}
-	return oStr.substring(1);
+	oStr = oStr.substring(1);	//Because I added a lazy space
+	if(oStr.length > 0) return oStr;
+	return null
 }
 
 //	TODO: getArgs(str, startIndex, stopIndex)	//Returns the string of the arguments between two argument indexes
@@ -239,7 +344,7 @@ String.prototype.toHHMMSS = function () {
 }
 
 function isMaster(msg){
-	if(msg.author.username === bozoid.master.username && msg.author.discriminator === bozoid.master.discriminator){
+	if((msg.author.username == bozoid.master.username && msg.author.discriminator == bozoid.master.discriminator) || msg.author.id == bozoid.master.id){
 		return true;
 	}
 	return false;
