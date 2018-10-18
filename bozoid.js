@@ -266,7 +266,7 @@ client.login(token);
 ////////////////
 
 function isBlacklisted(user){
-	for(var listed of blacklist){
+	for(var listed of blacklist.users){
 		if(listed.id == user.id) return true;
 	}
 	return false;
