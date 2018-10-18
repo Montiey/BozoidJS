@@ -180,7 +180,7 @@ client.on('message', msg => {
 		//
 
 		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) == null){
-			var oStr = "Blacklisted users: \n";
+			var oStr = "";
 			for(var listed of blacklist.users){
 				var targetMember = msg.guild.member(listed.id);
 
@@ -196,9 +196,8 @@ client.on('message', msg => {
 				}
 			}
 
-			if(oStr.length > 0) msg.channel.send(oStr);
+			if(blacklist.users.length > 0) msg.channel.send(oStr);
 			else msg.channel.send("Everyone is nice :)");
-
 		}
 
 		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) != null && isMaster(msg)){
