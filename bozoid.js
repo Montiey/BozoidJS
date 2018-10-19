@@ -43,7 +43,7 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-	console.log("(" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message.
+	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message.
 	
 	//
 
