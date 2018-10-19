@@ -207,7 +207,7 @@ client.on('message', msg => {
 		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) != null && isMaster(msg)){
 			var targetMember = msg.guild.member(getArg(msg.content, 1).substr(2, 18));	//Discord snowflakes are 18 characters long
 
-			console.log("id: " + targetMember.id + " of " + targetMember.user.username);
+			console.log("id: " + targetMember.user.id + " of " + targetMember.user.username);
 
 			if(targetMember != null){
 				var id = targetMember.id;
@@ -240,7 +240,7 @@ client.on('message', msg => {
 		if(isCmd(msg.content, 0, "unblacklist") && isMaster(msg)){
 			var targetMember = msg.guild.member(getArg(msg.content, 1).substr(2, 18));	//Discord snowflakes are 18 characters long
 
-			console.log("id: " + targetMember.id + " of " + targetMember.user.username);
+			console.log("id: " + targetMember.user.id + " of " + targetMember.user.username);
 
 			if(targetMember != null){
 				var id = targetMember.id;
