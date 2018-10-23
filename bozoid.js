@@ -1,17 +1,19 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+
 const fs = require('fs');
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
-const configPath = "bozoid.json";
-const tokenPath = "private/token.json";
-const vocabularyPath = "private/vocabulary.json";
-const blacklistPath = "private/blacklist.json";
+
+let configPath = "bozoid.json";
+let tokenPath = "private/token.json";
+let vocabularyPath = "private/vocabulary.json";
+let blacklistPath = "private/blacklist.json";
 
 var bozoid = JSON.parse(fs.readFileSync(configPath));
 var token = JSON.parse(fs.readFileSync(tokenPath)).token;
 
-var vocabulary;	//lists are held in runtime and written to disk as they're updated
+var vocabulary;
 try{
 	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
 } catch(e){
@@ -160,6 +162,7 @@ client.on('message', msg => {
 		}
 
 		//
+		
 		if(msg.content.startsWith(".r")) msg.delete(0);
 		if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Scor")) msg.delete(30000);
 
@@ -180,7 +183,7 @@ client.on('message', msg => {
 		//
 
 		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) == null){
-			var oStr = "";
+			var oStr = "Blacklisted users on this guild:\n`";
 			var anyInGuild = false;
 			for(var listed of blacklist.users){
 				var targetMember = msg.guild.member(listed.id);
@@ -198,8 +201,7 @@ client.on('message', msg => {
 			}
 
 			if(oStr.length > 0 && anyInGuild){
-				msg.channel.send("Blacklisted users: ");
-				msg.channel.send(oStr);
+				msg.channel.send(oStr + "`");
 			}
 			else msg.channel.send("No users on this guild have been blacklisted");
 		}
@@ -256,7 +258,6 @@ client.on('message', msg => {
 			}
 		}
 	}
-	
 });
 
 client.on('error', e => {
@@ -264,6 +265,8 @@ client.on('error', e => {
 	console.log(e);
 });
 
+
+console.log("Jumping to lightspeed...");
 client.login(token);
 
 ////////////////
