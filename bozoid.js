@@ -44,11 +44,11 @@ client.on('ready', () => {
 
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message.
-	
+
 	//
 
 	if(isCmd(msg.content, 0, "help")){
-		msg.channel.send("https://www.github.com/Montiey/BozoidJS\nI'm BozoidJS, Bozoid.java's younger, slightly stuipider cousin.");
+		msg.channel.send("https://www.github.com/Montiey/BozoidJS\nI'm Bozoid.js, Bozoid.java's younger, slightly stuipider cousin.");
 	}
 	if((msg.content.toLowerCase().includes("nou") || msg.content.toLowerCase().includes("no u")) && !msg.author.bot){
 		msg.channel.send("no u");
@@ -57,20 +57,19 @@ client.on('message', msg => {
 	if(msg.content.toLowerCase().includes("gay") && !msg.author.bot){
 		msg.channel.send("you have the big gay");
 	}
-	
+
 	if(!msg.author.bot){
-			for(var aka of bozoid.names){
-				if(msg.content.toLowerCase().includes(aka.toLowerCase())){
-					msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
-					break;
-				}
+		for(var aka of bozoid.names){
+			if(msg.content.toLowerCase().includes(aka.toLowerCase())){
+				msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
+				break;
 			}
 		}
-	
+	}
+
 	////////
 
 	if(!isBlacklisted(msg.author)){	//Commands here vvv
-		
 	   if(isCmd(msg.content, 0, "ping")){
 			msg.channel.send("Pong! Uptime: `" + (process.uptime() + "").toHHMMSS() + "`");
 	   }
@@ -81,7 +80,6 @@ client.on('message', msg => {
 			msg.delete(0);
 			var limit = getArg(msg.content, 1);
 			limit = Math.min(limit, bozoid.spamLimit);
-
 
 			for(var i = 0; i < limit; i++){
 				msg.channel.send(getArg(msg.content, 2));
@@ -148,6 +146,7 @@ client.on('message', msg => {
 		if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null && isMaster(msg)){
 			var word = getArgs(msg.content, 1);
 			var index = 0;
+
 			for(var value of vocabulary.list){
 				if(value == word){
 					vocabulary.list.splice(index, 1);
@@ -160,8 +159,9 @@ client.on('message', msg => {
 		}
 
 		//
-		if(msg.content.startsWith(".r")) msg.delete(0);
-		if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Scor")) msg.delete(30000);
+
+		if(msg.content.startsWith(".r34")) msg.delete(0);
+		if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Score")) msg.delete(30000);
 
 		//
 
@@ -256,7 +256,7 @@ client.on('message', msg => {
 			}
 		}
 	}
-	
+
 });
 
 client.on('error', e => {
@@ -317,7 +317,7 @@ function getArg(str, index){	//Returns the string of an argument at an index
 		if(oStr.length > 0) return oStr;
 		return null;
 	}
-	
+
 }
 
 function getArgs(str, index){	//Returns the rest of a string after an argument index
@@ -334,10 +334,8 @@ function getArgs(str, index){	//Returns the rest of a string after an argument i
 	return null
 }
 
-//	TODO: getArgs(str, startIndex, stopIndex)	//Returns the string of the arguments between two argument indexes
-
-String.prototype.toHHMMSS = function () {
-    var sec_num = parseInt(this, 10); // don't forget the second param
+String.prototype.toHHMMSS = function () {	//SO blackmagic
+    var sec_num = parseInt(this, 10);
     var hours   = Math.floor(sec_num / 3600);
     var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
     var seconds = sec_num - (hours * 3600) - (minutes * 60);
