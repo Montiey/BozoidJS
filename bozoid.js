@@ -256,7 +256,6 @@ client.on('message', msg => {
 			}
 		}
 	}
-
 });
 
 client.on('error', e => {
