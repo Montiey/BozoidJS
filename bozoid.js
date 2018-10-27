@@ -1,15 +1,19 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+
 const fs = require('fs');
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
-const configPath = "bozoid.json";
-const tokenPath = "private/token.json";
+
+const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
+const token = JSON.parse(fs.readFileSync("private/token.json")).token;
+const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"))
+const googleImages = require("google-images");
+const imgClient = new googleImages(cseKeys.id, cseKeys.key);
+
+//declare the paths to these files so they can be accessed later. Not needed for everything.
 const vocabularyPath = "private/vocabulary.json";
 const blacklistPath = "private/blacklist.json";
-
-var bozoid = JSON.parse(fs.readFileSync(configPath));
-var token = JSON.parse(fs.readFileSync(tokenPath)).token;
 
 var vocabulary;	//lists are held in runtime and written to disk as they're updated
 try{
@@ -174,7 +178,7 @@ client.on('message', msg => {
 		if(isCmd(msg.content, 0, "shutdown")){
 			setStatus(bozoid.game, "offline");
 			msg.channel.send("Shutting Down...");
-			process.exit(6969420);
+			process.exit(5);
 		}
 
 		//
@@ -255,6 +259,15 @@ client.on('message', msg => {
 				writeJSON(blacklist, blacklistPath);
 			}
 		}
+
+		if(isCmd(msg.content, 0, "img") && getArgs(msg.content, 1) != null){
+			console.log("Search...");
+
+			imgClient.search(getArgs(msg.content, 1)).then(images => {
+				msg.channel.send("Found: " + images[0].url);
+			});
+		}
+
 	}
 });
 
@@ -269,7 +282,10 @@ client.login(token);
 
 function isBlacklisted(user){
 	for(var listed of blacklist.users){
-		if(listed.id == user.id) return true;
+		if(listed.id == user.id){
+			console.log("blacklisted");
+			return true;
+		}
 	}
 	return false;
 }

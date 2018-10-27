@@ -21,3 +21,11 @@ For you to do:
 	"token": "xxxxxxxxxxxxxxxxxx"
 }
 ```
+
+* add `private/googleCSE.json`
+
+```
+{
+	"id": "<id of the CSE image search engine to use>",
+	"key": "<your CSE client key to identify this bot/user>"
+}
