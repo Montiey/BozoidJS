@@ -264,9 +264,14 @@ client.on('message', msg => {
 			console.log("Image search");
 
 			imgClient.search(getArgs(msg.content, 1)).then(images => {
-				msg.channel.send({
-					file: images[0].url
-				});
+				for(var test of images){
+					if(/(\.(gif|jpg|jpeg|tiff|png)$)/.test(test.url)){
+						msg.channel.send({
+							file: test.url
+						});
+						break;
+					}
+				}
 			});
 		}
 
