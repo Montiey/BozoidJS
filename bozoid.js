@@ -261,10 +261,12 @@ client.on('message', msg => {
 		}
 
 		if(isCmd(msg.content, 0, "img") && getArgs(msg.content, 1) != null){
-			console.log("Search...");
+			console.log("Image search");
 
 			imgClient.search(getArgs(msg.content, 1)).then(images => {
-				msg.channel.send("Found: " + images[0].url);
+				msg.channel.send({
+					file: images[0].url
+				});
 			});
 		}
 
