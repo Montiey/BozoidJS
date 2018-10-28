@@ -178,7 +178,7 @@ client.on('message', msg => {
 		if(isCmd(msg.content, 0, "shutdown")){
 			setStatus(bozoid.game, "offline");
 			msg.channel.send("Shutting Down...");
-			process.exit(5);
+			process.exit(1);
 		}
 
 		//
