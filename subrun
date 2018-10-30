@@ -2,7 +2,7 @@
 
 let LAST=0
 
-while [ "$LAST" != "1" ]
+while [ "$LAST" != "3" ]
 do
 	echo "Updating..."
 	git pull

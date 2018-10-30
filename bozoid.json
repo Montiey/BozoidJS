@@ -12,5 +12,7 @@
 	],
 	"game": "thanoscar",
 	"cmdPref": "$",
+	"shutdownCode": 3,
+	"restartCode": 0,
 	"spamLimit": 20
 }

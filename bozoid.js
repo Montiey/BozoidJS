@@ -172,13 +172,13 @@ client.on('message', msg => {
 		if(isCmd(msg.content, 0, "restart") || isCmd(msg.content, 0, "reboot")){
 			setStatus(bozoid.game, "offline");
 			msg.channel.send("Restarting...");
-			process.exit(0);
+			process.exit(bozoid.restartCode);
 		}
 
 		if(isCmd(msg.content, 0, "shutdown")){
 			setStatus(bozoid.game, "offline");
 			msg.channel.send("Shutting Down...");
-			process.exit(1);
+			process.exit(bozoid.shutdownCode);
 		}
 
 		//
