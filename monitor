@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo '======== Processes ========'
-ps -ef | grep -e 'node'
-ps -ef | grep -e './subrun'
-echo '======== Tail bozoid.log ========'
-tail -f bozoid.log

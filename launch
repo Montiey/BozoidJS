@@ -1,4 +1,0 @@
-#!/bin/bash
-
-nohup ./subrun -o > bozoid.log &
-./monitor
