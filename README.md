@@ -6,9 +6,10 @@ Montiey's personal Discord slave
 
 ---
 
-Included utilities:
-* `launch`: launches Bozoid in the background (you can close the shell)
-* `monitor`: shows you all the things
+Deploying Bozoid - The general idea:
+* bozoid.js is a Node.js app, so we can do `node bozoid.js`
+* If it crashes or you close the shell, the bot stops. So, we use a process manager: `pm2 start bozoid.js`
+* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands
 
 ---
 
@@ -22,10 +23,10 @@ For you to do:
 }
 ```
 
-* add `private/googleCSE.json`
+* add `private/googleCSE.json` (optional, but image search won't work)
 
 ```
 {
 	"id": "<id of the CSE image search engine to use>",
-	"key": "<your CSE client key to identify this bot/user>"
+	"key": "<your CSE client key, to identify this bot/user>"
 }
