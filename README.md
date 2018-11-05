@@ -4,31 +4,28 @@
 
 Montiey's personal Discord slave
 
----
+* Deployment:
+	* `$ sudo su`	Best to do everything as root
+	* `$ apt-get update`	Good idea to update before installing anything
+	* `$ apt install nodejs`
+	* `$ apt install npm`
+	* `$ git clone https://www.github.com/Montiey/BozoidJS.git`
+	* `$ cd BozoidJS`
+	* add `private/token.json`
+	```
+	{
+		"token": "xxxxxxxxxxxxxxxxxx"
+	}
+	```
+	* add `private/googleCSE.json` (optional, but image search won't work if you don't)
 
-Deploying Bozoid - The general idea:
-* bozoid.js is a Node.js app, so we can do `$ node bozoid.js`
-* If it crashes or you close the shell, the bot stops. So, we use a process manager to daemonize it: `$ pm2 start bozoid.js`
-* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands, such as:
-* `$ PM2 list` to show all processes running (under the current user).
-* `$ PM2 logs <id>` to show the live log feed.
-
----
-
-For you to do:
-* create the `private` directory
-* add `private/token.json`
-
-```
-{
-	"token": "xxxxxxxxxxxxxxxxxx"
-}
-```
-
-* add `private/googleCSE.json` (optional, but image search won't work if you don't)
-
-```
-{
-	"id": "<id of the CSE image search engine to use>",
-	"key": "<your CSE client key, to identify this bot/user>"
-}
+	```
+	{
+		"id": "<id of the CSE image search engine to use>",
+		"key": "<your CSE client key, to identify this bot/user>"
+	}
+	* `$ npm install`
+	* You *could* launch bozoid with `$ node bozoid.js`, but if the shell closes or the process crashes, the bot dies. So, daemonize it with a process manager: `$ pm2 start bozoid.js`.
+	* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands, such as:
+	* `$ pm2 list` to show all processes running (under the current user).
+	* `$ pm2 logs <id>` to show the live log feed.
