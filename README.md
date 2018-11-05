@@ -9,8 +9,10 @@ Montiey's personal Discord slave
 	* `$ apt-get update`	Good idea to update before installing anything
 	* `$ apt install nodejs`
 	* `$ apt install npm`
+	* `$ npm install -g pm2`	Install PM2 globally
 	* `$ git clone https://www.github.com/Montiey/BozoidJS.git`
 	* `$ cd BozoidJS`
+	* `$ npm install`
 	* add `private/token.json`
 	```
 	{
@@ -25,7 +27,6 @@ Montiey's personal Discord slave
 		"key": "<your CSE client key, to identify this bot/user>"
 	}
 	```
-	* `$ npm install`
 	* You *could* launch bozoid with `$ node bozoid.js`, but if the shell closes or the process crashes, the bot dies. So, daemonize it with a process manager: `$ pm2 start bozoid.js`.
 	* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands, such as:
 	* `$ pm2 list` to show all processes running (under the current user).
