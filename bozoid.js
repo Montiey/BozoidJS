@@ -11,11 +11,12 @@ const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"))
 const googleImages = require("google-images");
 const imgClient = new googleImages(cseKeys.id, cseKeys.key);
 
-//declare the paths to these files so they can be accessed later. Not needed for everything.
+//Declare the paths to these files so they can be accessed later. Not needed for static jsons.
 const vocabularyPath = "private/vocabulary.json";
 const blacklistPath = "private/blacklist.json";
 
-var vocabulary;	//lists are held in runtime and written to disk as they're updated
+//Lists are held in runtime and written to disk as they're updated
+var vocabulary;
 try{
 	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
 } catch(e){
@@ -41,11 +42,6 @@ try{
 	};
 }
 
-client.on('ready', () => {
-	setStatus(bozoid.game, "online");
-	console.log("Ready: " + client.user.tag);
-});
-
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message.
 
@@ -54,6 +50,7 @@ client.on('message', msg => {
 	if(isCmd(msg.content, 0, "help")){
 		msg.channel.send("https://www.github.com/Montiey/BozoidJS\nI'm Bozoid.js, Bozoid.java's younger, slightly stuipider cousin.");
 	}
+
 	if((msg.content.toLowerCase().includes("nou") || msg.content.toLowerCase().includes("no u")) && !msg.author.bot){
 		msg.channel.send("no u");
 	}
@@ -281,6 +278,11 @@ client.on('message', msg => {
 client.on('error', e => {
 	console.log("discord.js client error:");
 	console.log(e);
+});
+
+client.on('ready', () => {
+	setStatus(bozoid.game, "online");
+	console.log("Ready: " + client.user.tag);
 });
 
 client.login(token);
