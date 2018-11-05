@@ -24,6 +24,7 @@ Montiey's personal Discord slave
 		"id": "<id of the CSE image search engine to use>",
 		"key": "<your CSE client key, to identify this bot/user>"
 	}
+	```
 	* `$ npm install`
 	* You *could* launch bozoid with `$ node bozoid.js`, but if the shell closes or the process crashes, the bot dies. So, daemonize it with a process manager: `$ pm2 start bozoid.js`.
 	* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands, such as:
