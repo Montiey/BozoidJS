@@ -1,40 +1,39 @@
-var commands = [
-	{
-		"context": "message",	//What kind of thing do I have to use to do the stuff that I have to do with?
-		"parameters": [	//Ordered list (e.g. $parameter0 parameter1 parameter2)
-			{
-				"type": "command",
-				"text": "ping",
-				"caseSensitive": false
+exports.commands = {
+	"onMessage": [	//When we do var x = require("<this file>") in bozoid.js, x.commands will be this array.
+		{
+			"context": "message",	//What kind of event will have an object available for use (message, user join, status change, etc)
+			"parameters": [	//Ordered list (e.g. ""$parameter0 parameter1 parameter2")
+				{
+					"type": "command",
+					"text": "ping",
+					"caseSensitive": false
+				}
+			],
+			"script": function(command, parameters, message){	//The command (as written here) gets passed to the function (also written here) once it's parsed
+				message.channel.send("Pong!");
 			}
-		],
-		"script": function(command, parameters, message){	//The command (as written here) gets passed to the function (also written here) once it's parsed
-			message.channel.send("Pong!");
-		}
-	},
-	{
-		"context": "message",
-		"parameters": [
-
-		]
-	}
-	{
-		"context": "message",
-		"parameters": [
-			{
-				"type": "command",
-				"text": "say",
-				"caseSensitive": false
-			},
-			{
-				"type": "input"
+		},
+		{
+			"context": "message",
+			"parameters": [
+				{
+					"type": "command",
+					"text": "say",
+					"caseSensitive": false
+				},
+				{
+					"type": "input"
+				}
+			],
+			"script": function(command, parameters, message){
+				message.channel.send("Someone said " + command.parameter);
+				message.channel.send("Now i'll say the second parameter: " + parameters[1]);
+				message.channel.send("Now i'll delete the message");
+				message.delete(0);
 			}
-		],
-		"script": function(command, parameters, message){
-			message.channel.send("Someone said " + command.parameter);
-			message.channel.send("Now i'll say the second parameter: " + parameters[1]);
-			message.channel.send("Now i'll delete the message");
-			message.delete(0);
 		}
+	],
+	"onNothing": {
+		"Other stuff": "nothing"
 	}
-];
+};

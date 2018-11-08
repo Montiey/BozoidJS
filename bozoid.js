@@ -9,13 +9,11 @@ const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
 const token = JSON.parse(fs.readFileSync("private/token.json")).token;
 const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"))
 const googleImages = require("google-images");
+var commands = require("./commands.js");	//Commands go here
 const imgClient = new googleImages(cseKeys.id, cseKeys.key);
 
-//Declare the paths to these files so they can be accessed later. Not needed for static jsons.
+//Declare the paths to these files so they can be written to later.
 const vocabularyPath = "private/vocabulary.json";
-const blacklistPath = "private/blacklist.json";
-
-//Lists are held in runtime and written to disk as they're updated
 var vocabulary;
 try{
 	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
@@ -26,7 +24,7 @@ try{
 		]
 	};
 }
-
+const blacklistPath = "private/blacklist.json";
 var blacklist;
 try{
 	blacklist = JSON.parse(fs.readFileSync(blacklistPath));
@@ -43,235 +41,9 @@ try{
 }
 
 client.on('message', msg => {
-	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content); //First thing we do is output the message.
-
-	//
-
-	if(isCmd(msg.content, 0, "help")){
-		msg.channel.send("https://www.github.com/Montiey/BozoidJS\nI'm Bozoid.js, Bozoid.java's younger, slightly stuipider cousin.");
-	}
-
-	if((msg.content.toLowerCase().includes("nou") || msg.content.toLowerCase().includes("no u")) && !msg.author.bot){
-		msg.channel.send("no u");
-	}
-
-	if(msg.content.toLowerCase().includes("gay") && !msg.author.bot){
-		msg.channel.send("you have the big gay");
-	}
-
-	if(!msg.author.bot){
-		for(var aka of bozoid.names){
-			if(msg.content.toLowerCase().includes(aka.toLowerCase())){
-				msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
-				break;
-			}
-		}
-	}
-
-	////////
-
-	if(!isBlacklisted(msg.author)){	//Commands here vvv
-	   if(isCmd(msg.content, 0, "ping")){
-			msg.channel.send("Pong! Uptime: `" + (process.uptime() + "").toHHMMSS() + "`");
-	   }
-
-		//
-
-		if(isCmd(msg.content, 0, "spam") && getArg(msg.content, 1) != null && !msg.author.bot){
-			msg.delete(0);
-			var limit = getArg(msg.content, 1);
-			limit = Math.min(limit, bozoid.spamLimit);
-
-			for(var i = 0; i < limit; i++){
-				msg.channel.send(getArg(msg.content, 2));
-			}
-		}
-
-		//
-
-		if(isCmd(msg.content, 0, "say") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
-			msg.delete(0);
-			msg.channel.send(getArgs(msg.content, 1));
-		}
-
-		if(isCmd(msg.content, 0, "zalgo") && getArg(msg.content, 1) != null  &&  !msg.author.bot){
-			msg.delete(0);
-			msg.channel.send(zalgo(getArgs(msg.content, 1)));
-		}
-
-		if(isCmd(msg.content, 0, "emote") && getArg(msg.content, 1) != null && !msg.author.bot){
-			msg.delete(0);
-			var str = getArgs(msg.content, 1).toLowerCase().match(/[a-z0-9]/g).join("");
-
-			var oStr = "";
-			var tempNew = "";
-			for(var i = 0; i < str.length; i++){
-				if(tempNew.length <= 2000) oStr = tempNew;
-
-				var char = str.charAt(i);
-
-				if(char == "b"){
-					tempNew = oStr + ":b:";
-					continue;
-				}
-				if(!isNaN(char)){
-					tempNew = oStr + ":" + numberConverter.toWords(parseInt(char)) + ":";
-					continue;
-				}
-				if(isNaN(char)){
-					tempNew = oStr + ":regional_indicator_" + char + ":";
-					continue;
-				}
-			}
-			if(tempNew.length <= 2000) oStr = tempNew;
-
-			if(oStr != ""){
-				msg.channel.send(oStr);
-			}
-		}
-
-		//
-
-		if(isCmd(msg.content, 0, "add") && !msg.author.bot && getArgs(msg.content, 1) != null && isMaster(msg)){
-			var word = getArgs(msg.content, 1);
-
-			if(vocabulary.list.indexOf(word) == -1){
-				vocabulary.list.push(word);
-				writeJSON(vocabulary, vocabularyPath);
-				msg.channel.send("Added to vocabulary: " + word);
-			} else{
-				console.log("Phrase already exists");
-			}
-		}
-
-		if(isCmd(msg.content, 0, "remove") && !msg.author.but && getArgs(msg.content, 1) != null && isMaster(msg)){
-			var word = getArgs(msg.content, 1);
-			var index = 0;
-
-			for(var value of vocabulary.list){
-				if(value == word){
-					vocabulary.list.splice(index, 1);
-					writeJSON(vocabulary, vocabularyPath);
-					msg.channel.send("Removed: " + word);
-					break;
-				}
-				index++;
-			};
-		}
-
-		//
-
-		if(msg.content.startsWith(".r34")) msg.delete(0);
-		if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Score")) msg.delete(30000);
-
-		//
-
-		if(isCmd(msg.content, 0, "restart") || isCmd(msg.content, 0, "reboot")){
-			setStatus(bozoid.game, "offline");
-			msg.channel.send("Restarting...");
-			process.exit(bozoid.restartCode);
-		}
-
-		if(isCmd(msg.content, 0, "shutdown")){
-			setStatus(bozoid.game, "offline");
-			msg.channel.send("Shutting Down...");
-			process.exit(bozoid.shutdownCode);
-		}
-
-		//
-
-		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) == null){
-			var oStr = "";
-			var anyInGuild = false;
-			for(var listed of blacklist.users){
-				var targetMember = msg.guild.member(listed.id);
-
-				if(targetMember == null) continue;
-				anyInGuild = true;
-				var tempNew = "`" + targetMember.user.username + "#" + targetMember.user.discriminator + " (" + targetMember.user.id + ")`\n";
-
-				if((oStr + tempNew).length > 2000){
-					msg.channel.send(oStr);
-					oStr = tempNew;
-				} else{
-					oStr += tempNew;
-				}
-			}
-
-			if(oStr.length > 0 && anyInGuild){
-				msg.channel.send("Blacklisted users: ");
-				msg.channel.send(oStr);
-			}
-			else msg.channel.send("No users on this guild have been blacklisted");
-		}
-
-		if(isCmd(msg.content, 0, "blacklist") && getArgs(msg.content, 1) != null && isMaster(msg)){
-			var targetMember = msg.guild.member(getArg(msg.content, 1).substr(2, 18));	//Discord snowflakes are 18 characters long
-
-			console.log("id: " + targetMember.user.id + " of " + targetMember.user.username);
-
-			if(targetMember != null){
-				var id = targetMember.id;
-				var by = msg.author.id;
-				var reason = getArgs(msg.content, 2);
-
-				var exists = false;
-				for(var listed of blacklist.users){
-					if(listed.id == id){
-						exists = true;
-					}
-				}
-
-				if(!exists){
-					blacklist.users.push({
-						id: id,
-						by: by,
-						reason: reason
-					});
-
-					writeJSON(blacklist, blacklistPath);
-
-					msg.channel.send("`" + targetMember.user.username + "#" + targetMember.user.discriminator + "` may no longer use `" + bozoid.cmdPref + "` commands.\nReason: `" + reason + "`");
-				} else{
-					msg.channel.send("`" + targetMember.user.username + "` has already been blacklisted.");
-				}
-			}
-		}
-
-		if(isCmd(msg.content, 0, "unblacklist") && isMaster(msg)){
-			var targetMember = msg.guild.member(getArg(msg.content, 1).substr(2, 18));	//Discord snowflakes are 18 characters long
-
-			console.log("id: " + targetMember.user.id + " of " + targetMember.user.username);
-
-			if(targetMember != null){
-				var id = targetMember.id;
-
-				for(var listed of blacklist.users){
-					if(listed.id === id){
-						blacklist.users.splice(blacklist.users.indexOf(listed), 1);
-						msg.channel.send("`" + targetMember.user.username + "#" + targetMember.user.discriminator + "` was removed from the blacklist.");
-					}
-				}
-
-				writeJSON(blacklist, blacklistPath);
-			}
-		}
-
-		if(isCmd(msg.content, 0, "img") && getArgs(msg.content, 1) != null){
-			console.log("Image search");
-
-			imgClient.search(getArgs(msg.content, 1)).then(images => {
-				for(var test of images){
-					if(/(\.(gif|jpg|jpeg|tiff|png)$)/.test(test.url)){
-						msg.channel.send({
-							file: test.url
-						});
-						break;
-					}
-				}
-			});
-		}
-
+	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+	for(var command of commands.commands.onMessage){
+		console.log(command.parameters[0].text);
 	}
 });
 
