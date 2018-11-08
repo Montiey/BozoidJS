@@ -1,0 +1,67 @@
+
+exports.isMaster = function(msg){
+	if((msg.author.username == bozoid.master.username && msg.author.discriminator == bozoid.master.discriminator) || msg.author.id == bozoid.master.id){
+		return true;
+	}
+	return false;
+}
+
+function isBlacklisted(user){
+	for(var listed of blacklist.users){
+		if(listed.id == user.id){
+			console.log("blacklisted");
+			return true;
+		}
+	}
+	return false;
+}
+
+function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
+	var text = JSON.stringify(obj, null, 4);
+	if(text != null){
+		fs.writeFileSync(path, text);
+	}
+}
+
+function isCmd(str, index, cmd){	//Checks if a string contains a prefixed command
+	return getArg(str, index) == (bozoid.cmdPref + cmd);
+}
+
+function getArg(str, index){	//Returns the string of an argument at an index
+	var tmpStr = str;
+	for(var i = 0; i < index; i++){
+		while(!tmpStr.startsWith(" ")){
+			tmpStr = tmpStr.substring(1);
+
+			if(tmpStr.length <= 1){
+				return null;
+			}
+		}
+		tmpStr = tmpStr.substring(1);
+	}
+	var EOA = tmpStr.indexOf(" ");	//End of argument index
+	if(EOA >= 0){
+		var oStr = tmpStr.substring(0, EOA);	//Excludes next space if index is -1
+		if(oStr.length > 0) return oStr;
+		return null;
+	} else{	//if there are no spaces in the string
+		var oStr = tmpStr.substring(0, tmpStr.length);
+		if(oStr.length > 0) return oStr;
+		return null;
+	}
+
+}
+
+function getArgs(str, index){	//Returns the rest of a string after an argument index
+	var tmpIndex = index;
+	var oStr = "";
+	var gotArg = getArg(str, tmpIndex);
+	while(gotArg != null){
+		oStr += " " + gotArg;
+		tmpIndex++;
+		gotArg = getArg(str, tmpIndex);
+	}
+	oStr = oStr.substring(1);	//Because I added a lazy space
+	if(oStr.length > 0) return oStr;
+	return null
+}

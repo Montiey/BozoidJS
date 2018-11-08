@@ -1,7 +1,6 @@
-exports.commands = {
-	"onMessage": [	//When we do var x = require("<this file>") in bozoid.js, x.commands will be this array.
+exports.list = {
+	"onMessage": [
 		{
-			"context": "message",	//What kind of event will have an object available for use (message, user join, status change, etc)
 			"parameters": [	//Ordered list (e.g. ""$parameter0 parameter1 parameter2")
 				{
 					"type": "command",

@@ -7,10 +7,11 @@ const numberConverter = require("number-to-words");
 
 const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
 const token = JSON.parse(fs.readFileSync("private/token.json")).token;
-const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"))
+const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"));
 const googleImages = require("google-images");
-var commands = require("./commands.js");	//Commands go here
+const commands = require("./commands.js");	//Commands go here
 const imgClient = new googleImages(cseKeys.id, cseKeys.key);
+const parser = require("./commandParser.js");
 
 //Declare the paths to these files so they can be written to later.
 const vocabularyPath = "private/vocabulary.json";
@@ -42,8 +43,15 @@ try{
 
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
-	for(var command of commands.commands.onMessage){
-		console.log(command.parameters[0].text);
+	for(var command of commands.list.onMessage){
+		var matchesAllParameters = true;
+		for(var i = 0; i < command.parameters.length; i++){
+			if(parameter[i].type == command){
+				if(prameter[i].text == parser.getArg(msg.content, i)){
+					console.log("Parameter match: " + paramater[i] + " " + parser.getArg(msg.content, i));
+				}
+			}
+		}
 	}
 });
 
@@ -61,76 +69,7 @@ client.login(token);
 
 ////////////////
 
-function isBlacklisted(user){
-	for(var listed of blacklist.users){
-		if(listed.id == user.id){
-			console.log("blacklisted");
-			return true;
-		}
-	}
-	return false;
-}
-
-function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
-	var text = JSON.stringify(obj, null, 4);
-	if(text != null){
-		fs.writeFileSync(path, text);
-	}
-}
-
-function setStatus(game, status){
-	client.user.setPresence({
-		game: {
-			name: game
-		},
-		status: status
-	});
-}
-
-function isCmd(str, index, cmd){	//Checks if a string contains a prefixed command
-	return getArg(str, index) == (bozoid.cmdPref + cmd);
-}
-
-function getArg(str, index){	//Returns the string of an argument at an index
-	var tmpStr = str;
-	for(var i = 0; i < index; i++){
-		while(!tmpStr.startsWith(" ")){
-			tmpStr = tmpStr.substring(1);
-
-			if(tmpStr.length <= 1){
-				return null;
-			}
-		}
-		tmpStr = tmpStr.substring(1);
-	}
-	var EOA = tmpStr.indexOf(" ");	//End of argument index
-	if(EOA >= 0){
-		var oStr = tmpStr.substring(0, EOA);	//Excludes next space if index is -1
-		if(oStr.length > 0) return oStr;
-		return null;
-	} else{	//if there are no spaces in the string
-		var oStr = tmpStr.substring(0, tmpStr.length);
-		if(oStr.length > 0) return oStr;
-		return null;
-	}
-
-}
-
-function getArgs(str, index){	//Returns the rest of a string after an argument index
-	var tmpIndex = index;
-	var oStr = "";
-	var gotArg = getArg(str, tmpIndex);
-	while(gotArg != null){
-		oStr += " " + gotArg;
-		tmpIndex++;
-		gotArg = getArg(str, tmpIndex);
-	}
-	oStr = oStr.substring(1);	//Because I added a lazy space
-	if(oStr.length > 0) return oStr;
-	return null
-}
-
-String.prototype.toHHMMSS = function () {	//SO blackmagic
+String.prototype.toHHMMSS = function () {
     var sec_num = parseInt(this, 10);
     var hours   = Math.floor(sec_num / 3600);
     var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
@@ -143,9 +82,11 @@ String.prototype.toHHMMSS = function () {	//SO blackmagic
     return time;
 }
 
-function isMaster(msg){
-	if((msg.author.username == bozoid.master.username && msg.author.discriminator == bozoid.master.discriminator) || msg.author.id == bozoid.master.id){
-		return true;
-	}
-	return false;
+function setStatus(game, status){
+	client.user.setPresence({
+		game: {
+			name: game
+		},
+		status: status
+	});
 }
