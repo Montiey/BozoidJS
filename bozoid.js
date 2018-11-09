@@ -13,44 +13,36 @@ const commands = require("./commands.js");	//Commands go here
 const imgClient = new googleImages(cseKeys.id, cseKeys.key);
 const parser = require("./commandParser.js");
 
-//Declare the paths to these files so they can be written to later.
-const vocabularyPath = "private/vocabulary.json";
-var vocabulary;
-try{
-	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
-} catch(e){
-	vocabulary = {
-		list: [
-			"oof"
-		]
-	};
-}
-const blacklistPath = "private/blacklist.json";
-var blacklist;
-try{
-	blacklist = JSON.parse(fs.readFileSync(blacklistPath));
-} catch(e){
-	blacklist = {
-		users: [
-			{
-				id: "420",
-				by: "Herobrine",
-				reason: "Griefing"
-			}
-		]
-	};
-}
-
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+
+	var messageParameters = parser.getParameters(msg.content);
 	for(var command of commands.list.onMessage){
-		var matchesAllParameters = true;
+		var pass = true;
+
+		//Incremental list of checks vvv (Lightest first)
+
+		if(!command.allowBot && msg.author.bot) pass = false;
+
+		if()
+
+		if(pass == true)
 		for(var i = 0; i < command.parameters.length; i++){
-			if(parameter[i].type == command){
-				if(prameter[i].text == parser.getArg(msg.content, i)){
-					console.log("Parameter match: " + paramater[i] + " " + parser.getArg(msg.content, i));
-				}
+			var parameter = command.parameters[i];
+
+			if(parameter.input) continue;	//If it's input, we don't need to check anything at all.
+
+			if(parameter.prefixed && bozoid.prefix + parameter.text != parser.getArg(msg.content, i)){
+				pass = false;
+				break;
+			} else if(parameter.keyword != parser.getArg(msg.content, i)){
+				pass = false;
+				break;
 			}
+		}
+
+		if(pass){	//Finally, if the command really should be run, do stuff
+			command.script(command, messageParameters, msg);
 		}
 	}
 });

@@ -6,7 +6,7 @@ exports.isMaster = function(msg){
 	return false;
 }
 
-function isBlacklisted(user){
+exports.isBlacklisted = function(user){
 	for(var listed of blacklist.users){
 		if(listed.id == user.id){
 			console.log("blacklisted");
@@ -16,18 +16,14 @@ function isBlacklisted(user){
 	return false;
 }
 
-function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
+exports.writeJSON = function(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
 	var text = JSON.stringify(obj, null, 4);
 	if(text != null){
 		fs.writeFileSync(path, text);
 	}
 }
 
-function isCmd(str, index, cmd){	//Checks if a string contains a prefixed command
-	return getArg(str, index) == (bozoid.cmdPref + cmd);
-}
-
-function getArg(str, index){	//Returns the string of an argument at an index
+exports.getArg = function(str, index){	//Returns the string of an argument at an index
 	var tmpStr = str;
 	for(var i = 0; i < index; i++){
 		while(!tmpStr.startsWith(" ")){
@@ -49,10 +45,9 @@ function getArg(str, index){	//Returns the string of an argument at an index
 		if(oStr.length > 0) return oStr;
 		return null;
 	}
-
 }
 
-function getArgs(str, index){	//Returns the rest of a string after an argument index
+exports.getArgs = function(str, index){	//Returns the rest of a string after an argument index
 	var tmpIndex = index;
 	var oStr = "";
 	var gotArg = getArg(str, tmpIndex);
