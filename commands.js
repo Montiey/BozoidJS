@@ -12,7 +12,7 @@ exports.list = {
 					"keyword": "ping"
 				}
 			],
-			"script": function(command, parameters, message){	//The command (as written here) gets passed to the function (this one right here) once it's parsed (convenience)
+			"script": function(command, parameters, message){	//The command object is sent to its own script property as a parameter
 				message.channel.send("Pong!");
 			}
 		},
