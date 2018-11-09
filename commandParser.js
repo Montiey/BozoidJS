@@ -1,4 +1,6 @@
 
+const parser = require("./commandParser.js");
+
 exports.isMaster = function(msg){
 	if((msg.author.username == bozoid.master.username && msg.author.discriminator == bozoid.master.discriminator) || msg.author.id == bozoid.master.id){
 		return true;
@@ -6,7 +8,7 @@ exports.isMaster = function(msg){
 	return false;
 }
 
-function isBlacklisted(user){
+exports.isBlacklisted = function(user){
 	for(var listed of blacklist.users){
 		if(listed.id == user.id){
 			console.log("blacklisted");
@@ -16,18 +18,7 @@ function isBlacklisted(user){
 	return false;
 }
 
-function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
-	var text = JSON.stringify(obj, null, 4);
-	if(text != null){
-		fs.writeFileSync(path, text);
-	}
-}
-
-function isCmd(str, index, cmd){	//Checks if a string contains a prefixed command
-	return getArg(str, index) == (bozoid.cmdPref + cmd);
-}
-
-function getArg(str, index){	//Returns the string of an argument at an index
+exports.getArg = function(str, index){	//Returns the string of an argument at an index
 	var tmpStr = str;
 	for(var i = 0; i < index; i++){
 		while(!tmpStr.startsWith(" ")){
@@ -49,19 +40,32 @@ function getArg(str, index){	//Returns the string of an argument at an index
 		if(oStr.length > 0) return oStr;
 		return null;
 	}
-
 }
 
-function getArgs(str, index){	//Returns the rest of a string after an argument index
+exports.getRest = function(str, index){	//Returns the rest of a string after an argument index
 	var tmpIndex = index;
 	var oStr = "";
-	var gotArg = getArg(str, tmpIndex);
+	var gotArg = parser.getArg(str, tmpIndex);
 	while(gotArg != null){
 		oStr += " " + gotArg;
 		tmpIndex++;
-		gotArg = getArg(str, tmpIndex);
+		gotArg = parser.getArg(str, tmpIndex);
 	}
 	oStr = oStr.substring(1);	//Because I added a lazy space
 	if(oStr.length > 0) return oStr;
 	return null
+}
+
+exports.getArgList = function(str){
+	var list = [];
+	var i;
+	var toAdd;
+	while(toAdd != null){
+		toAdd = parser.getArg(str, i);
+		if(toAdd != null){
+			list.push(toAdd);
+			i++;
+		}
+	}
+	return list;
 }

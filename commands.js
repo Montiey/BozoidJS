@@ -1,38 +1,34 @@
+const parser = require("./commandParser.js");
+
 exports.list = {
 	"onMessage": [
 		{
-			"parameters": [	//Ordered list (e.g. ""$parameter0 parameter1 parameter2")
+			"name": "Ping",	//Common name, not important
+			"allowBot": false,	//Whether to respond on messages from bots (including self)
+			"parameters": [	//Ordered list of space-delimited parameters from text
 				{
-					"type": "command",
-					"text": "ping",
-					"caseSensitive": false
+					"input": false,
+					"prefixed": true,
+					"keyword": "ping"
 				}
 			],
-			"script": function(command, parameters, message){	//The command (as written here) gets passed to the function (also written here) once it's parsed
+			"script": function(command, parameters, message){	//The command (as written here) gets passed to the function (this one right here) once it's parsed (convenience)
 				message.channel.send("Pong!");
 			}
 		},
 		{
-			"context": "message",
+			"name": "Say",
+			"allowBot": false,
 			"parameters": [
 				{
-					"type": "command",
-					"text": "say",
-					"caseSensitive": false
-				},
-				{
-					"type": "input"
+					"input": false,
+					"prefixed": true,
+					"keyword": "say"
 				}
 			],
 			"script": function(command, parameters, message){
-				message.channel.send("Someone said " + command.parameter);
-				message.channel.send("Now i'll say the second parameter: " + parameters[1]);
-				message.channel.send("Now i'll delete the message");
-				message.delete(0);
+				message.channel.send(parser.getRest(message.content, 1));
 			}
 		}
-	],
-	"onNothing": {
-		"Other stuff": "nothing"
-	}
+	]
 };

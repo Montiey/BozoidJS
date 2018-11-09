@@ -13,44 +13,43 @@ const commands = require("./commands.js");	//Commands go here
 const imgClient = new googleImages(cseKeys.id, cseKeys.key);
 const parser = require("./commandParser.js");
 
-//Declare the paths to these files so they can be written to later.
-const vocabularyPath = "private/vocabulary.json";
-var vocabulary;
-try{
-	vocabulary = JSON.parse(fs.readFileSync(vocabularyPath));
-} catch(e){
-	vocabulary = {
-		list: [
-			"oof"
-		]
-	};
-}
-const blacklistPath = "private/blacklist.json";
-var blacklist;
-try{
-	blacklist = JSON.parse(fs.readFileSync(blacklistPath));
-} catch(e){
-	blacklist = {
-		users: [
-			{
-				id: "420",
-				by: "Herobrine",
-				reason: "Griefing"
-			}
-		]
-	};
-}
-
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+
 	for(var command of commands.list.onMessage){
-		var matchesAllParameters = true;
+		var pass = true;
+
+		//Incremental list of checks vvv (Lightest first)
+
+		if(!command.allowBot && msg.author.bot){
+			console.log("Bot. Not allowing.")
+			pass = false;
+		}
+
+		if(pass == true)
 		for(var i = 0; i < command.parameters.length; i++){
-			if(parameter[i].type == command){
-				if(prameter[i].text == parser.getArg(msg.content, i)){
-					console.log("Parameter match: " + paramater[i] + " " + parser.getArg(msg.content, i));
-				}
+			var parameter = command.parameters[i];
+
+			if(parameter.input){
+				console.log("Input parameter, skipping...");
+				continue;	//If it's input, we don't need to check anything at all.
 			}
+
+			if(parameter.prefixed && bozoid.cmdPref + parameter.keyword != parser.getArg(msg.content, i)){
+				console.log("Prefixed keyword not met: " + parameter.keyword + ", skipping...");
+				pass = false;
+				break;
+			}
+			if(!parameter.prefixed && parameter.keyword != parser.getArg(msg.content, i)){
+				console.log("Keyword not met: " + parameter.keyword + ", skipping...");
+				pass = false;
+				break;
+			}
+		}
+
+		if(pass){	//Finally, if the command really should be run, do stuff
+			console.log("Passed! Running...");
+			command.script(command, parser.getArgList(msg.content, command.parameters.length), msg);
 		}
 	}
 });
@@ -80,6 +79,13 @@ String.prototype.toHHMMSS = function () {
     if (seconds < 10) {seconds = "0"+seconds;}
     var time    = hours+':'+minutes+':'+seconds;
     return time;
+}
+
+function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
+	var text = JSON.stringify(obj, null, 4);
+	if(text != null){
+		fs.writeFileSync(path, text);
+	}
 }
 
 function setStatus(game, status){
