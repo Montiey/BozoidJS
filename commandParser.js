@@ -1,4 +1,3 @@
-
 const parser = require("./commandParser.js");
 
 exports.isMaster = function(msg){

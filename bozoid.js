@@ -2,15 +2,10 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const fs = require('fs');
-const zalgo = require("to-zalgo");
-const numberConverter = require("number-to-words");
 
 const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
 const token = JSON.parse(fs.readFileSync("private/token.json")).token;
-const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"));
-const googleImages = require("google-images");
 const commands = require("./commands.js");	//Commands go here
-const imgClient = new googleImages(cseKeys.id, cseKeys.key);
 const parser = require("./commandParser.js");
 
 client.on('message', msg => {
@@ -49,7 +44,7 @@ client.on('message', msg => {
 
 		if(pass){	//Finally, if the command really should be run, do stuff
 			console.log("Passed! Running...");
-			command.script(command, parser.getArgList(msg.content, command.parameters.length), msg);
+			command.script(command, msg);
 		}
 	}
 });
@@ -79,13 +74,6 @@ String.prototype.toHHMMSS = function () {
     if (seconds < 10) {seconds = "0"+seconds;}
     var time    = hours+':'+minutes+':'+seconds;
     return time;
-}
-
-function writeJSON(obj, path){	//Careful! Keep production .jsons safe from untested write operations!
-	var text = JSON.stringify(obj, null, 4);
-	if(text != null){
-		fs.writeFileSync(path, text);
-	}
 }
 
 function setStatus(game, status){
