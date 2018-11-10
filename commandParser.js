@@ -55,16 +55,16 @@ exports.getRest = function(str, index){	//Returns the rest of a string after an 
 	return null
 }
 
-exports.getArgList = function(str){
-	var list = [];
-	var i;
-	var toAdd;
-	while(toAdd != null){
-		toAdd = parser.getArg(str, i);
-		if(toAdd != null){
-			list.push(toAdd);
-			i++;
-		}
-	}
-	return list;
-}
+// exports.getArgList = function(str){
+// 	var list = [];
+// 	var i;
+// 	var toAdd;
+// 	while(toAdd != null){
+// 		toAdd = parser.getArg(str, i);
+// 		if(toAdd != null){
+// 			list.push(toAdd);
+// 			i++;
+// 		}
+// 	}
+// 	return list;
+// }

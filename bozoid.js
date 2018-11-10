@@ -7,6 +7,7 @@ const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
 const token = JSON.parse(fs.readFileSync("private/token.json")).token;
 const commands = require("./commands.js");	//Commands go here
 const parser = require("./commandParser.js");
+const util = require("./util.js");
 
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
@@ -14,36 +15,34 @@ client.on('message', msg => {
 	for(var command of commands.list.onMessage){
 		var pass = true;
 
-		//Incremental list of checks vvv (Lightest first)
-
 		if(!command.allowBot && msg.author.bot){
-			console.log("Bot. Not allowing.")
+			// console.log("Bot. Not allowing.")
 			pass = false;
 		}
 
-		if(pass == true)
+		if(pass == true && command.parameters)
 		for(var i = 0; i < command.parameters.length; i++){
 			var parameter = command.parameters[i];
 
 			if(parameter.input){
-				console.log("Input parameter, skipping...");
+				// console.log("Input parameter, skipping...");
 				continue;	//If it's input, we don't need to check anything at all.
 			}
 
 			if(parameter.prefixed && bozoid.cmdPref + parameter.keyword != parser.getArg(msg.content, i)){
-				console.log("Prefixed keyword not met: " + parameter.keyword + ", skipping...");
+				// console.log("Prefixed keyword not met: " + parameter.keyword + ", skipping...");
 				pass = false;
 				break;
 			}
 			if(!parameter.prefixed && parameter.keyword != parser.getArg(msg.content, i)){
-				console.log("Keyword not met: " + parameter.keyword + ", skipping...");
+				// console.log("Keyword not met: " + parameter.keyword + ", skipping...");
 				pass = false;
 				break;
 			}
 		}
 
 		if(pass){	//Finally, if the command really should be run, do stuff
-			console.log("Passed! Running...");
+			// console.log("Passed! Running...");
 			command.script(command, msg);
 		}
 	}
@@ -55,7 +54,7 @@ client.on('error', e => {
 });
 
 client.on('ready', () => {
-	setStatus(bozoid.game, "online");
+	util.setStatus(client, bozoid.game, "online");
 	console.log("Ready: " + client.user.tag);
 });
 
@@ -74,13 +73,4 @@ String.prototype.toHHMMSS = function () {
     if (seconds < 10) {seconds = "0"+seconds;}
     var time    = hours+':'+minutes+':'+seconds;
     return time;
-}
-
-function setStatus(game, status){
-	client.user.setPresence({
-		game: {
-			name: game
-		},
-		status: status
-	});
 }
