@@ -271,7 +271,7 @@ exports.list = {
 			}
 		},
 		{	//No parameters for this one.. So it runs on every message.
-			name: "Housekeeping",
+			name: "Go crazy",
 			noHelp: true,	//Don't show in the help command
 			allowBot: false,
 			script: function(cmd, msg){
@@ -291,8 +291,15 @@ exports.list = {
 						break;
 					}
 				}
+			}
+		},
+		{
+			name: "Housekeeping",
+			noHelp: true,	//Don't show in the help command
+			allowBot: true,
+			script: function(cmd, msg){
 				if(msg.content.startsWith(".r34")) msg.delete(0);
-				if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Score")) msg.delete(30000);
+				if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Score")) msg.delete(15000);
 			}
 		}
 	]
