@@ -70,7 +70,7 @@ exports.list = {
 				var num = Math.min(parser.getArg(msg.content, 1), maxSpams);
 
 				for(var i = 0; i < num; i++){
-					msg.channel.send(parser.getArg(msg.content, 2));
+					msg.channel.send(parser.getRest(msg.content, 2));
 				}
 			}
 		},
