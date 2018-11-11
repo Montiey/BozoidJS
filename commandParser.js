@@ -1,12 +1,5 @@
 const parser = require("./commandParser.js");
 
-exports.isMaster = function(msg){
-	if((msg.author.username == bozoid.master.username && msg.author.discriminator == bozoid.master.discriminator) || msg.author.id == bozoid.master.id){
-		return true;
-	}
-	return false;
-}
-
 exports.isBlacklisted = function(user){
 	for(var listed of blacklist.users){
 		if(listed.id == user.id){

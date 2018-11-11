@@ -1,15 +1,20 @@
-const parser = require("./commandParser.js");
-const commands = require("./commands.js");
-const util = require("./util.js");
 const files = require("./files.js");
+const fs = require('fs');
+const bozoid = JSON.parse(fs.readFileSync(files.paths.config));
+
+const cseKeys = JSON.parse(fs.readFileSync(files.paths.googleCSE));
+const googleImages = require("google-images");
+const imgClient = new googleImages(cseKeys.id, cseKeys.key);
+
+
+const commands = require(files.paths.commands);
+const parser = require(files.paths.parser);
+const util = require("./util.js");
+
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
 
-const fs = require('fs');
-const cseKeys = JSON.parse(fs.readFileSync("private/googleCSE.json"));
-const googleImages = require("google-images");
-const imgClient = new googleImages(cseKeys.id, cseKeys.key);
-const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
+
 
 exports.list = {
 	onMessage: [
@@ -139,6 +144,7 @@ exports.list = {
 		{
 			name: "Add Vocabulary",
 			allowBot: false,
+			masterOnly: true,
 			parameters: [
 				{
 					prefixed: true,
@@ -166,6 +172,7 @@ exports.list = {
 		{
 			name: "Remove Vocabulary",
 			allowBot: false,
+			masterOnly: true,
 			parameters: [
 				{
 					prefixed: true,
@@ -277,11 +284,11 @@ exports.list = {
 			noHelp: true,	//Don't show in the help command
 			allowBot: false,
 			script: function(cmd, msg){
-				if(msg.content.includes("nou") || msg.content.includes("no u")){
+				if(msg.content.toLowerCase().includes("nou") || msg.content.toLowerCase().includes("no u")){
 					msg.channel.send("no u");
 				}
 
-				if(msg.content.includes("gay")){
+				if(msg.content.toLowerCase().includes("gay")){
 					msg.channel.send("You have been diagnosed with: `the big gay`");
 				}
 

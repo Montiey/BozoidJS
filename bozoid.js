@@ -3,11 +3,12 @@ const client = new Discord.Client();
 
 const fs = require('fs');
 
-const bozoid = JSON.parse(fs.readFileSync("bozoid.json"));
-const token = JSON.parse(fs.readFileSync("private/token.json")).token;
-const commands = require("./commands.js");	//Commands go here
-const parser = require("./commandParser.js");
-const util = require("./util.js");
+const files = require("./files.js");	//We at least need a static path for this one
+const bozoid = JSON.parse(fs.readFileSync(files.paths.config));
+const token = JSON.parse(fs.readFileSync(files.paths.token)).token;
+const commands = require(files.paths.commands);	//Commands go here
+const parser = require(files.paths.parser);
+const util = require(files.paths.util);
 
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
@@ -19,6 +20,8 @@ client.on('message', msg => {
 			// console.log("Bot. Not allowing.")
 			pass = false;
 		}
+
+		if(command.masterOnly && bozoid.master.id != msg.author.id) pass = false;
 
 		if(pass == true && command.parameters)
 		for(var i = 0; i < command.parameters.length; i++){
