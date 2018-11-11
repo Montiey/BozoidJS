@@ -41,6 +41,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
+				msg.delete(0);
 				msg.channel.send(parser.getRest(msg.content, 1));
 			}
 		},
@@ -87,6 +88,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
+				msg.delete(0);
 				msg.channel.send(zalgo(parser.getRest(msg.content, 1)));
 			}
 		},
