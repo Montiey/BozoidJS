@@ -35,7 +35,7 @@ Montiey's personal Discord slave
 		"token": "xxxxxxxxxxxxxxxxxx"
 	}
 	```
-	* add `private/googleCSE.json` (optional, but image search won't work if you don't)
+	* add `private/googleCSE.json`
 
 	```
 	{
