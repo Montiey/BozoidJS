@@ -13,6 +13,22 @@ Montiey's personal Discord slave
 	* `$ git clone https://www.github.com/Montiey/BozoidJS.git`
 	* `$ cd BozoidJS`
 	* `$ npm install`
+	* add `private/bozoid.json`
+	```
+	{
+        "master": {
+                "id": "xxxxxxxxxxxxxxxxxx"
+        },
+        "names": [
+                "boz",
+                "bozoid",
+                "bozo",
+                "daddy boz"
+        ],
+        "game": "thanoscar",
+        "cmdPref": "$"
+	}
+	```
 	* add `private/token.json`
 	```
 	{
