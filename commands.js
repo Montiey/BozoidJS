@@ -14,8 +14,6 @@ const util = require("./util.js");
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
 
-
-
 exports.list = {
 	onMessage: [
 		{
@@ -215,7 +213,7 @@ exports.list = {
 			],
 			script: function(cmd, msg){
 				console.log("Image search");
-
+				msg.channel.startTyping();
 				imgClient.search(parser.getRest(msg.content, 1)).then(images => {
 					for(var test of images){
 						if(/(\.(gif|jpg|jpeg|tiff|png)$)/.test(test.url)){
@@ -225,6 +223,7 @@ exports.list = {
 							break;
 						}
 					}
+					msg.channel.stopTyping();
 				});
 			}
 		},
