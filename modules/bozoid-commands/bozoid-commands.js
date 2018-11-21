@@ -1,16 +1,11 @@
-const files = require("./files.js");
 const fs = require('fs');
-const bozoid = JSON.parse(fs.readFileSync(files.paths.config));
 
-const cseKeys = JSON.parse(fs.readFileSync(files.paths.googleCSE));
+const fileIO = require("bozoid-config-manager");
 const googleImages = require("google-images");
-const imgClient = new googleImages(cseKeys.id, cseKeys.key);
-
-
-const commands = require(files.paths.commands);
-const parser = require(files.paths.parser);
-const util = require("./util.js");
-
+const config = fileIO.read("bozoid.json");
+const imgClient = new googleImages(config.CSEID, config.CSEKey);
+const commands = require("bozoid-commands");
+const parser = require("bozoid-command-parser");
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
 
@@ -21,7 +16,7 @@ exports.list = {
 			allowBot: false,	//Whether to respond on messages from bots (including self)
 			parameters: [
 				{
-					// input: false,	//True to check nothing and leave for the script to use
+					// input: false,	//Make true to check nothing and leave for the script to use
 					prefixed: true,	//True if must start with the command prefix
 					keyword: "ping"	//The keyword to check
 				}
@@ -156,15 +151,14 @@ exports.list = {
 			script: function(cmd, msg){
 				var phrase = parser.getRest(msg.content, 1);
 
-				var vocabulary = util.readJSON(files.paths.vocabulary);
-
-				if(vocabulary.list.indexOf(phrase) == -1){
-					vocabulary.list.push(phrase);
-					util.writeJSON(vocabulary, files.paths.vocabulary);
-					msg.channel.send("Added to vocabulary: " + phrase);
-				} else{
-					console.log("Phrase already exists");
-				}
+				fileIO.update("vocabulary.json", function(obj){
+					if(obj.list.indexOf(phrase) == -1){
+						obj.list.push(phrase);
+						msg.channel.send("Added to vocabulary: " + phrase);
+					} else{
+						console.log("Phrase already exists");
+					}
+				});
 			}
 		},
 		{
@@ -185,22 +179,21 @@ exports.list = {
 				var phrase = parser.getRest(msg.content, 1);
 				var index = 0;
 
-				var vocabulary = util.readJSON(files.paths.vocabulary);
-
-				for(var value of vocabulary.list){
-					if(value == phrase){
-						vocabulary.list.splice(index, 1);
-						util.writeJSON(vocabulary, files.paths.vocabulary);
-						msg.channel.send("Removed: " + phrase);
-						break;
+				fileIO.update("vocabulary.json", function(obj){
+					for(var value of obj.list){
+						if(value == phrase){
+							obj.list.splice(index, 1);
+							msg.channel.send("Removed: " + phrase);
+							break;
+						}
+						index++;
 					}
-					index++;
-				};
+				});
 			}
 		},
 		{
 			name: "Image search",
-			allowBot: true,
+			allowBot: false,
 			parameters: [
 				{
 					prefixed: true,
@@ -237,8 +230,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				util.setStatus(msg.client, bozoid.game, "offline");
-
+				msg.client.setStatus("idle");
 				msg.channel.send("Restarting...").then(function(){
 					process.exit(0);
 				});
@@ -264,7 +256,7 @@ exports.list = {
 						if(p.input){
 							cmdStr += "[" + p.description + "] ";
 						} else{
-							if(p.prefixed) cmdStr += bozoid.cmdPref;
+							if(p.prefixed) cmdStr += config.cmdPref;
 							cmdStr += p.keyword + " ";
 						}
 					}
@@ -278,7 +270,7 @@ exports.list = {
 				}
 			}
 		},
-		{	//No parameters for this one.. So it runs on every message.
+		{	//No parameters, script runs reguardless of message content
 			name: "Go crazy",
 			noHelp: true,	//Don't show in the help command
 			allowBot: false,
@@ -291,11 +283,10 @@ exports.list = {
 					msg.channel.send("You have been diagnosed with: `the big gay`");
 				}
 
-				for(var aka of bozoid.names){
-					var vocabulary = util.readJSON(files.paths.vocabulary);
-
+				var vocab = fileIO.read("vocabulary.json").list;
+				for(var aka of fileIO.read("bozoid.json").names){
 					if(msg.content.toLowerCase().includes(aka.toLowerCase())){
-						msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
+						msg.channel.send(vocab[Math.floor(Math.random() * vocab.length)]);
 						break;
 					}
 				}
