@@ -1,8 +1,8 @@
 {
-  "name": "bozoid-config-manager",
+  "name": "bozoid-file-grabber",
   "version": "1.0.0",
   "description": "",
-  "main": "bozoid-config-manager.js",
+  "main": "bozoid-file-grabber.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

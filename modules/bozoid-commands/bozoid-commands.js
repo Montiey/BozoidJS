@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const fileIO = require("bozoid-config-manager");
+const fileIO = require("bozoid-file-grabber");
 const googleImages = require("google-images");
 const config = fileIO.read("bozoid.json");
 const imgClient = new googleImages(config.CSEID, config.CSEKey);
@@ -240,6 +240,7 @@ exports.list = {
 		{
 			name: "Help",
 			allowBot: false,
+			noHelp: false,
 			parameters: [
 				{
 					prefixed: true,
@@ -252,7 +253,7 @@ exports.list = {
 				for(var command of commands.list.onMessage){
 					if(command.noHelp) continue;
 					var cmdStr = "";
-					cmdStr += command.name + ": `";
+					cmdStr += "`";
 					for(var p of command.parameters){
 						if(p.input){
 							cmdStr += "[" + p.description + "] ";
@@ -262,7 +263,7 @@ exports.list = {
 						}
 					}
 
-					cmdStr += "`\n";
+					cmdStr += "` " + command.name + "\n";
 					oStr += cmdStr;
 				}
 
@@ -335,6 +336,7 @@ exports.list = {
 							}
 						}
 						if(!exists) json.list.push({
+							referenceName: listedUser.username + "#" + listedUser.discriminator,	//NOT reliable! Just might as well have it.
 							id: listedUser.id,
 							reason: reason,
 							by: byUser.id
@@ -346,6 +348,94 @@ exports.list = {
 						msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` is already blacklisted.");
 					}
 				});
+			}
+		},
+		{
+			name: "Remove users from the blacklist",
+			noHelp: false,
+			allowBot: false,
+			masterOnly: true,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "unblacklist"
+				},
+				{
+					input: true,
+					description: "@mention"
+				}
+			],
+			script: function(cmd, msg){
+				msg.client.fetchUser(/[0-9]+/.exec(parser.getArg(msg.content, 1))[0]).then(function(listedUser){
+					var exists = false;
+
+					fileIO.update("blacklist.json", function(json){
+						for(var i = 0; i < json.list.length; i++){
+							if(json.list[i].id == listedUser.id){
+								exists = true;
+								json.list.splice(i, 1);
+							}
+						}
+					});
+
+					if(exists){
+						msg.channel.send("Removed `" + listedUser.username + "#" + listedUser.discriminator + "` from the blacklist file");
+					} else{
+						msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` isn't in the blacklist file");
+					}
+				});
+			}
+		},
+		{
+			name: "List people on the blacklist",
+			noHelp: false,
+			allowBot: false,
+			masterOnly: true,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "listblacklist"
+				}
+			],
+			script: function(cmd, msg){
+				var oStr = "";
+				var anyInGuild = false;
+				var list = fileIO.read("blacklist.json").list;
+				for(var listed of list){
+					var targetMember = msg.guild.member(listed.id);
+
+					if(targetMember == null) continue;
+					anyInGuild = true;	//Else
+					var tempNew = "`" + targetMember.user.username + "#" + targetMember.user.discriminator + "` ";
+
+					if((oStr + tempNew).length > 2000){	//Fire off a message if we're exceeding 2000 characters
+						msg.channel.send(oStr);
+						oStr = tempNew;
+					} else{
+						oStr += tempNew;
+					}
+				}
+
+				if(oStr.length > 0 && anyInGuild){
+					msg.channel.send("Blacklisted users: ");
+					msg.channel.send(oStr);
+				}
+				else msg.channel.send("No users on this guild have been blacklisted");
+
+
+
+				// for(var listedUser of list){
+				// 	if(json.list[i].id == listedUser.id){
+				// 		exists = true;
+				// 		json.list.splice(i, 1);
+				// 	}
+				// }
+				//
+				// if(exists){
+				// 	msg.channel.send("Removed `" + listedUser.username + "#" + listedUser.discriminator + "` from the blacklist file");
+				// } else{
+				// 	msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` isn't in the blacklist file");
+				// }
 			}
 		}
 	]

@@ -3,7 +3,7 @@ global.__basedir = __dirname;	//Set __basedir to this directory (project root)
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const fileIO = require("bozoid-config-manager");
+const fileIO = require("bozoid-file-grabber");
 const commands = require("bozoid-commands");
 const config = fileIO.read("bozoid.json");
 const parser = require("bozoid-command-parser");
