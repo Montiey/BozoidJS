@@ -18,9 +18,18 @@ client.on('message', msg => {
 			pass = false;
 		}
 
-		if(command.masterOnly && config.master.id != msg.author.id) pass = false;
+		if(command.masterOnly && config.master.id != msg.author.id){
+			pass = false;
+		}
 
-		if(pass == true && command.parameters)
+		for(var listedUser of fileIO.read("blacklist.json").list){
+			if(listedUser.id == msg.author.id && !command.allowBlacklisted){
+				pass = false;
+				break;
+			}
+		}
+
+		if(pass && command.parameters)
 		for(var i = 0; i < command.parameters.length; i++){
 			var parameter = command.parameters[i];
 

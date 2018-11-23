@@ -11,9 +11,10 @@ const numberConverter = require("number-to-words");
 
 exports.list = {
 	onMessage: [
-		{
-			name: "Ping",	//Common name, not important
+		{	//The root of a command object
+			name: "Ping",	//Common display name
 			allowBot: false,	//Whether to respond on messages from bots (including self)
+			allowBlacklisted: false,	//Whether to let blacklisted users use this command
 			parameters: [
 				{
 					// input: false,	//Make true to check nothing and leave for the script to use
@@ -299,6 +300,52 @@ exports.list = {
 			script: function(cmd, msg){
 				if(msg.content.startsWith(".r34")) msg.delete(0);
 				if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Score") || msg.content.includes("Cannot use again for another")) msg.delete(15000);
+			}
+		},
+		{
+			name: "Add a user to blacklist",
+			noHelp: false,
+			allowBot: false,
+			masterOnly: true,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "blacklist"
+				},
+				{
+					input: true,
+					description: "@mention"
+				},
+				{
+					input: true,
+					description: "reason"
+				}
+			],
+			script: function(cmd, msg){
+				var reason = parser.getRest(msg.content, 2);
+				var byUser = msg.author;
+				msg.client.fetchUser(/[0-9]+/.exec(parser.getArg(msg.content, 1))[0]).then(function(listedUser){
+					var exists = false;
+
+					fileIO.update("blacklist.json", function(json){
+						for(var alreadyListed of json.list){
+							if(alreadyListed.id == listedUser.id){
+								exists = true;
+								continue;
+							}
+						}
+						if(!exists) json.list.push({
+							id: listedUser.id,
+							reason: reason,
+							by: byUser.id
+						});
+					});
+					if(!exists){
+						msg.channel.send("`" + byUser.username + "#" + byUser.discriminator + "` blacklisted `" + listedUser.username + "#" + listedUser.discriminator + "` for `" + reason + "`");
+					} else{
+						msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` is already blacklisted.");
+					}
+				});
 			}
 		}
 	]
