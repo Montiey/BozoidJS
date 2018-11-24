@@ -66,7 +66,7 @@ exports.list = {
 			script: function(cmd, msg){
 				msg.delete(0);
 
-				var maxSpams = 20;
+				var maxSpams = 5;
 
 				var num = Math.min(parser.getArg(msg.content, 1), maxSpams);
 
