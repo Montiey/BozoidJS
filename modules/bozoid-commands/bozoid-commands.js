@@ -1,9 +1,11 @@
 const fs = require('fs');
 
 const fileIO = require("bozoid-file-grabber");
-const googleImages = require("google-images");
 const config = fileIO.read("bozoid.json");
-const imgClient = new googleImages(config.CSEID, config.CSEKey);
+
+const googleImages = require("google-images");						////// Comment out if not using the search engine
+const imgClient = new googleImages(config.CSEID, config.CSEKey);	////// "										"
+
 const commands = require("bozoid-commands");
 const parser = require("bozoid-command-parser");
 const zalgo = require("to-zalgo");
