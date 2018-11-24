@@ -4,46 +4,26 @@
 
 Montiey's personal Discord slave
 
-* Deployment:
+* Deployment on Ubuntu 16.04.5 LTS:
 	* `$ sudo su`	Best to do everything as root
-	* `$ apt-get update`	Good idea to update before installing anything
-	* `$ apt install nodejs`
-	* `$ apt install npm`
-	* `$ npm install -g pm2`	Install PM2 globally
-	* `$ git clone https://www.github.com/Montiey/BozoidJS.git`
+	* `$ apt-get update`	Good idea to update package indexes before installing anything
+	* `$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -`	Run the script, adding the proper PPA repository to the index.	(10.x wasn't working... 8.x works just fine)
+	* `$ apt-get install -y nodejs`	Install nodejs from the alternate repository; includes npm
+	* `$ npm install -g pm2`	Install PM2, globally
+	* `$ git clone https://www.github.com/Montiey/BozoidJS.git`	Get the bot
 	* `$ cd BozoidJS`
-	* `$ npm install`
-	* add `private/bozoid.json`
-	```
-	{
-        "master": {
-                "id": "xxxxxxxxxxxxxxxxxx"
-        },
-        "names": [
-                "boz",
-                "bozoid",
-                "bozo",
-                "daddy boz"
-        ],
-        "game": "thanoscar",
-        "cmdPref": "$"
-	}
-	```
-	* add `private/token.json`
-	```
-	{
-		"token": "xxxxxxxxxxxxxxxxxx"
-	}
-	```
-	* add `private/googleCSE.json`
-
-	```
-	{
-		"id": "<id of the CSE image search engine to use>",
-		"key": "<your CSE client key, to identify this bot/user>"
-	}
-	```
-	* You *could* launch bozoid with `$ node bozoid.js`, but if the shell closes or the process crashes, the bot dies. So, daemonize it with a process manager: `$ pm2 start bozoid.js`.
+	* `$ npm install`	Install everything listed in Bozoid's `package.json`
+* JSON Setup
+	* A few files in `./config` must exist in order for the bot to work. Copy the sample files, and remove `.sample` from the file name.
+	* `bozoid.json`
+		* `token`: The token of the bot user that Bozoid will log in as.
+		* `CSEID` & `CSEKey`: The ID and key of the [Google Custom Search Engine](https://www.google.com/cse/) to use. Comment out the appropriate lines in `bozoid-commands.js` if left blank
+		* `master`: The ID of the user to be respected as the owner of the bot- in charge of blacklisting, etc.
+		* `names`: Aliases the bot should be recognized as
+		* `game`: The status game
+		* `cmdPref`: The prefix for all commands
+* Launching
+	* You *could* launch bozoid with `$ node bozoid.js`, but if the shell closes or the process crashes, the bot dies. So, instead daemonize it with that manager you installed: `$ pm2 start bozoid.js`.
 	* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands, such as:
-	* `$ pm2 list` to show all processes running (under the current user).
-	* `$ pm2 logs <id>` to show the live log feed.
+	* `$ pm2 list` to show all processes running under the current user, and get its ID
+	* `$ pm2 logs <id> --lines <# of lines>` to show the live log feed.

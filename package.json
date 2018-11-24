@@ -4,6 +4,10 @@
   "description": "Montiey's personal Discord Slave",
   "main": "bozoid.js",
   "dependencies": {
+    "all": "0.0.0",
+    "bozoid-command-parser": "file:./modules/bozoid-command-parser",
+    "bozoid-commands": "file:./modules/bozoid-commands",
+    "bozoid-file-grabber": "file:./modules/bozoid-file-grabber",
     "discord.js": "^11.4.2",
     "google-images": "^2.1.0",
     "jquery": "^3.3.1",

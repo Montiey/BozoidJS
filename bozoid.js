@@ -1,14 +1,12 @@
+global.__basedir = __dirname;	//Set __basedir to this directory (project root)
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const fs = require('fs');
-
-const files = require("./files.js");	//We at least need a static path for this one
-const bozoid = JSON.parse(fs.readFileSync(files.paths.config));
-const token = JSON.parse(fs.readFileSync(files.paths.token)).token;
-const commands = require(files.paths.commands);	//Commands go here
-const parser = require(files.paths.parser);
-const util = require(files.paths.util);
+const fileIO = require("bozoid-file-grabber");
+const commands = require("bozoid-commands");
+const config = fileIO.read("bozoid.json");
+const parser = require("bozoid-command-parser");
 
 client.on('message', msg => {
 	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
@@ -17,13 +15,21 @@ client.on('message', msg => {
 		var pass = true;
 
 		if(!command.allowBot && msg.author.bot){
-			// console.log("Bot. Not allowing.")
 			pass = false;
 		}
 
-		if(command.masterOnly && bozoid.master.id != msg.author.id) pass = false;
+		if(command.masterOnly && config.master.id != msg.author.id){
+			pass = false;
+		}
 
-		if(pass == true && command.parameters)
+		for(var listedUser of fileIO.read("blacklist.json").list){
+			if(listedUser.id == msg.author.id && !command.allowBlacklisted){
+				pass = false;
+				break;
+			}
+		}
+
+		if(pass && command.parameters)
 		for(var i = 0; i < command.parameters.length; i++){
 			var parameter = command.parameters[i];
 
@@ -32,7 +38,7 @@ client.on('message', msg => {
 				continue;	//If it's input, we don't need to check anything at all.
 			}
 
-			if(parameter.prefixed && bozoid.cmdPref + parameter.keyword != parser.getArg(msg.content, i)){
+			if(parameter.prefixed && config.cmdPref + parameter.keyword != parser.getArg(msg.content, i)){
 				// console.log("Prefixed keyword not met: " + parameter.keyword + ", skipping...");
 				pass = false;
 				break;
@@ -57,11 +63,17 @@ client.on('error', e => {
 });
 
 client.on('ready', () => {
-	util.setStatus(client, bozoid.game, "online");
+	client.user.setPresence({
+		game: {
+			name: config.game,
+			type: 0
+		},
+		status: "online"
+	});
 	console.log("Ready: " + client.user.tag);
 });
 
-client.login(token);
+client.login(config.token);
 
 ////////////////
 

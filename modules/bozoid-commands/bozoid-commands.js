@@ -1,27 +1,25 @@
-const files = require("./files.js");
 const fs = require('fs');
-const bozoid = JSON.parse(fs.readFileSync(files.paths.config));
 
-const cseKeys = JSON.parse(fs.readFileSync(files.paths.googleCSE));
-const googleImages = require("google-images");
-const imgClient = new googleImages(cseKeys.id, cseKeys.key);
+const fileIO = require("bozoid-file-grabber");
+const config = fileIO.read("bozoid.json");
 
+const googleImages = require("google-images");						////// Comment out if not using the search engine
+const imgClient = new googleImages(config.CSEID, config.CSEKey);	////// "										"
 
-const commands = require(files.paths.commands);
-const parser = require(files.paths.parser);
-const util = require("./util.js");
-
+const commands = require("bozoid-commands");
+const parser = require("bozoid-command-parser");
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
 
 exports.list = {
 	onMessage: [
-		{
-			name: "Ping",	//Common name, not important
+		{	//The root of a command object
+			name: "Ping",	//Common display name
 			allowBot: false,	//Whether to respond on messages from bots (including self)
+			allowBlacklisted: false,	//Whether to let blacklisted users use this command
 			parameters: [
 				{
-					// input: false,	//True to check nothing and leave for the script to use
+					// input: false,	//Make true to check nothing and leave for the script to use
 					prefixed: true,	//True if must start with the command prefix
 					keyword: "ping"	//The keyword to check
 				}
@@ -68,7 +66,7 @@ exports.list = {
 			script: function(cmd, msg){
 				msg.delete(0);
 
-				var maxSpams = 20;
+				var maxSpams = 5;
 
 				var num = Math.min(parser.getArg(msg.content, 1), maxSpams);
 
@@ -156,15 +154,14 @@ exports.list = {
 			script: function(cmd, msg){
 				var phrase = parser.getRest(msg.content, 1);
 
-				var vocabulary = util.readJSON(files.paths.vocabulary);
-
-				if(vocabulary.list.indexOf(phrase) == -1){
-					vocabulary.list.push(phrase);
-					util.writeJSON(vocabulary, files.paths.vocabulary);
-					msg.channel.send("Added to vocabulary: " + phrase);
-				} else{
-					console.log("Phrase already exists");
-				}
+				fileIO.update("vocabulary.json", function(obj){
+					if(obj.list.indexOf(phrase) == -1){
+						obj.list.push(phrase);
+						msg.channel.send("Added to vocabulary: " + phrase);
+					} else{
+						console.log("Phrase already exists");
+					}
+				});
 			}
 		},
 		{
@@ -185,22 +182,21 @@ exports.list = {
 				var phrase = parser.getRest(msg.content, 1);
 				var index = 0;
 
-				var vocabulary = util.readJSON(files.paths.vocabulary);
-
-				for(var value of vocabulary.list){
-					if(value == phrase){
-						vocabulary.list.splice(index, 1);
-						util.writeJSON(vocabulary, files.paths.vocabulary);
-						msg.channel.send("Removed: " + phrase);
-						break;
+				fileIO.update("vocabulary.json", function(obj){
+					for(var value of obj.list){
+						if(value == phrase){
+							obj.list.splice(index, 1);
+							msg.channel.send("Removed: " + phrase);
+							break;
+						}
+						index++;
 					}
-					index++;
-				};
+				});
 			}
 		},
 		{
 			name: "Image search",
-			allowBot: true,
+			allowBot: false,
 			parameters: [
 				{
 					prefixed: true,
@@ -237,8 +233,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				util.setStatus(msg.client, bozoid.game, "offline");
-
+				msg.client.setStatus("idle");
 				msg.channel.send("Restarting...").then(function(){
 					process.exit(0);
 				});
@@ -247,6 +242,7 @@ exports.list = {
 		{
 			name: "Help",
 			allowBot: false,
+			noHelp: false,
 			parameters: [
 				{
 					prefixed: true,
@@ -259,17 +255,17 @@ exports.list = {
 				for(var command of commands.list.onMessage){
 					if(command.noHelp) continue;
 					var cmdStr = "";
-					cmdStr += command.name + ": `";
+					cmdStr += "`";
 					for(var p of command.parameters){
 						if(p.input){
 							cmdStr += "[" + p.description + "] ";
 						} else{
-							if(p.prefixed) cmdStr += bozoid.cmdPref;
+							if(p.prefixed) cmdStr += config.cmdPref;
 							cmdStr += p.keyword + " ";
 						}
 					}
 
-					cmdStr += "`\n";
+					cmdStr += "` " + command.name + "\n";
 					oStr += cmdStr;
 				}
 
@@ -278,7 +274,7 @@ exports.list = {
 				}
 			}
 		},
-		{	//No parameters for this one.. So it runs on every message.
+		{	//No parameters, script runs reguardless of message content
 			name: "Go crazy",
 			noHelp: true,	//Don't show in the help command
 			allowBot: false,
@@ -291,11 +287,10 @@ exports.list = {
 					msg.channel.send("You have been diagnosed with: `the big gay`");
 				}
 
-				for(var aka of bozoid.names){
-					var vocabulary = util.readJSON(files.paths.vocabulary);
-
+				var vocab = fileIO.read("vocabulary.json").list;
+				for(var aka of fileIO.read("bozoid.json").names){
 					if(msg.content.toLowerCase().includes(aka.toLowerCase())){
-						msg.channel.send(vocabulary.list[Math.floor(Math.random() * vocabulary.list.length)]);
+						msg.channel.send(vocab[Math.floor(Math.random() * vocab.length)]);
 						break;
 					}
 				}
@@ -308,6 +303,141 @@ exports.list = {
 			script: function(cmd, msg){
 				if(msg.content.startsWith(".r34")) msg.delete(0);
 				if(msg.content.includes("`No results found on`") || msg.content.startsWith("`Score") || msg.content.includes("Cannot use again for another")) msg.delete(15000);
+			}
+		},
+		{
+			name: "Add a user to blacklist",
+			noHelp: false,
+			allowBot: false,
+			masterOnly: true,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "blacklist"
+				},
+				{
+					input: true,
+					description: "@mention"
+				},
+				{
+					input: true,
+					description: "reason"
+				}
+			],
+			script: function(cmd, msg){
+				var reason = parser.getRest(msg.content, 2);
+				var byUser = msg.author;
+				msg.client.fetchUser(/[0-9]+/.exec(parser.getArg(msg.content, 1))[0]).then(function(listedUser){
+					var exists = false;
+
+					fileIO.update("blacklist.json", function(json){
+						for(var alreadyListed of json.list){
+							if(alreadyListed.id == listedUser.id){
+								exists = true;
+								continue;
+							}
+						}
+						if(!exists) json.list.push({
+							referenceName: listedUser.username + "#" + listedUser.discriminator,	//NOT reliable! Just might as well have it.
+							id: listedUser.id,
+							reason: reason,
+							by: byUser.id
+						});
+					});
+					if(!exists){
+						msg.channel.send("`" + byUser.username + "#" + byUser.discriminator + "` blacklisted `" + listedUser.username + "#" + listedUser.discriminator + "` for `" + reason + "`");
+					} else{
+						msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` is already blacklisted.");
+					}
+				});
+			}
+		},
+		{
+			name: "Remove users from the blacklist",
+			noHelp: false,
+			allowBot: false,
+			masterOnly: true,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "unblacklist"
+				},
+				{
+					input: true,
+					description: "@mention"
+				}
+			],
+			script: function(cmd, msg){
+				msg.client.fetchUser(/[0-9]+/.exec(parser.getArg(msg.content, 1))[0]).then(function(listedUser){
+					var exists = false;
+
+					fileIO.update("blacklist.json", function(json){
+						for(var i = 0; i < json.list.length; i++){
+							if(json.list[i].id == listedUser.id){
+								exists = true;
+								json.list.splice(i, 1);
+							}
+						}
+					});
+
+					if(exists){
+						msg.channel.send("Removed `" + listedUser.username + "#" + listedUser.discriminator + "` from the blacklist file");
+					} else{
+						msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` isn't in the blacklist file");
+					}
+				});
+			}
+		},
+		{
+			name: "List people on the blacklist",
+			noHelp: false,
+			allowBot: false,
+			masterOnly: true,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "listblacklist"
+				}
+			],
+			script: function(cmd, msg){
+				var oStr = "";
+				var anyInGuild = false;
+				var list = fileIO.read("blacklist.json").list;
+				for(var listed of list){
+					var targetMember = msg.guild.member(listed.id);
+
+					if(targetMember == null) continue;
+					anyInGuild = true;	//Else
+					var tempNew = "`" + targetMember.user.username + "#" + targetMember.user.discriminator + "` ";
+
+					if((oStr + tempNew).length > 2000){	//Fire off a message if we're exceeding 2000 characters
+						msg.channel.send(oStr);
+						oStr = tempNew;
+					} else{
+						oStr += tempNew;
+					}
+				}
+
+				if(oStr.length > 0 && anyInGuild){
+					msg.channel.send("Blacklisted users: ");
+					msg.channel.send(oStr);
+				}
+				else msg.channel.send("No users on this guild have been blacklisted");
+
+
+
+				// for(var listedUser of list){
+				// 	if(json.list[i].id == listedUser.id){
+				// 		exists = true;
+				// 		json.list.splice(i, 1);
+				// 	}
+				// }
+				//
+				// if(exists){
+				// 	msg.channel.send("Removed `" + listedUser.username + "#" + listedUser.discriminator + "` from the blacklist file");
+				// } else{
+				// 	msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` isn't in the blacklist file");
+				// }
 			}
 		}
 	]

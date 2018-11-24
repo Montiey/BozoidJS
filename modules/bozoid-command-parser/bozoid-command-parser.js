@@ -1,4 +1,4 @@
-const parser = require("./commandParser.js");
+const parser = require("bozoid-command-parser");
 
 exports.isBlacklisted = function(user){
 	for(var listed of blacklist.users){
@@ -34,7 +34,7 @@ exports.getArg = function(str, index){	//Returns the string of an argument at an
 	}
 }
 
-exports.getRest = function(str, index){	//Returns the rest of a string after an argument index
+exports.getRest = function(str, index){	//Returns the rest of a string at an argument index getRest("a b c d e f", 2) -> "c d e f"
 	var tmpIndex = index;
 	var oStr = "";
 	var gotArg = parser.getArg(str, tmpIndex);
