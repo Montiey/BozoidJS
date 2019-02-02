@@ -8,9 +8,11 @@
     "bozoid-command-parser": "file:./modules/bozoid-command-parser",
     "bozoid-commands": "file:./modules/bozoid-commands",
     "bozoid-file-grabber": "file:./modules/bozoid-file-grabber",
+    "curl": "^0.1.4",
     "discord.js": "^11.4.2",
     "google-images": "^2.1.0",
     "jquery": "^3.3.1",
+    "jsdom": "^13.2.0",
     "number-to-words": "^1.2.4",
     "pm2": "^3.2.2",
     "to-zalgo": "^1.0.1"

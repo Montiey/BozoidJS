@@ -11,6 +11,10 @@ const parser = require("bozoid-command-parser");
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
 
+const curl = require("curlrequest");
+const jsdom = require("jsdom");
+const {JSDOM} = jsdom;
+
 exports.list = {
 	onMessage: [
 		{	//The root of a command object
@@ -423,21 +427,47 @@ exports.list = {
 					msg.channel.send(oStr);
 				}
 				else msg.channel.send("No users on this guild have been blacklisted");
+			}
+		},
+		{
+			name: "Pewdiepie vs TSeries",
+			allowBot: false,
+			noHelp: false,
+			parameters: [
+				{
+					prefixed: true,
+					keyword: "pewds"
+				}
+			],
+			script: function(cmd, msg){
+				function getSubs(user, callback){
+					msg.channel.startTyping();
 
+					curl.request({
+						url: "https://socialblade.com/youtube/user/" + user,
+						headers: {
+							accept: "*/*",
+						}
+					}, function(err, resp){
+						if(err){
+							console.log(">>> ERROR: " + err);
+						} else{
+							const {window} = new JSDOM(resp);
+							var $ = require("jquery")(window);
+							callback(parseInt($("#youtube-stats-header-subs").text()));
+							msg.channel.stopTyping();
+						}
+					});
+				}
 
-
-				// for(var listedUser of list){
-				// 	if(json.list[i].id == listedUser.id){
-				// 		exists = true;
-				// 		json.list.splice(i, 1);
-				// 	}
-				// }
-				//
-				// if(exists){
-				// 	msg.channel.send("Removed `" + listedUser.username + "#" + listedUser.discriminator + "` from the blacklist file");
-				// } else{
-				// 	msg.channel.send("`" + listedUser.username + "#" + listedUser.discriminator + "` isn't in the blacklist file");
-				// }
+				getSubs("tseries", function(tser){
+					setTimeout(function(){
+						getSubs("pewdiepie", function(pew){
+							console.log(pew + " " + tser);
+							msg.channel.send("Pewdiepie is currently ahead by: `" + (pew - tser) + "` subscribers");
+						});
+					}, 500);
+				});
 			}
 		}
 	]
