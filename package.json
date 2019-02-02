@@ -8,7 +8,7 @@
     "bozoid-command-parser": "file:./modules/bozoid-command-parser",
     "bozoid-commands": "file:./modules/bozoid-commands",
     "bozoid-file-grabber": "file:./modules/bozoid-file-grabber",
-    "curl": "^0.1.4",
+    "curlrequest": "^1.0.1",
     "discord.js": "^11.4.2",
     "google-images": "^2.1.0",
     "jquery": "^3.3.1",
