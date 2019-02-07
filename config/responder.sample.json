@@ -1,0 +1,12 @@
+{
+    "list": [
+        {
+            "trigger": "bada bing",
+            "response": "bada boom"
+        },
+        {
+            "trigger": "wanna play minecraft",
+            "response": "no"
+        }
+    ]
+}

@@ -5,67 +5,82 @@ const client = new Discord.Client();
 
 const fileIO = require("bozoid-file-grabber");
 const commands = require("bozoid-commands");
-const config = fileIO.read("bozoid.json");
-const parser = require("bozoid-command-parser");
+const bozoid = fileIO.read("bozoid.json");
+const parser = require("discord-command-parser");
 
 client.on('message', msg => {
-	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")[" + msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")["
+	+ msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
 
 	for(var command of commands.list.onMessage){
+		// console.log("Testing " + command.description);
+
+		var parsed = parser.parse(msg, bozoid.cmdPref);
 		var pass = true;
 
-		if(!command.allowBot && msg.author.bot){
+		//Cascading checking section
+
+		if(pass && command.command && command.command != parsed.command){
+			// console.log("Wrong command");
 			pass = false;
 		}
 
-		if(command.masterOnly && config.master.id != msg.author.id){
+		if(pass && !command.allowBot && msg.author.bot){
+			// console.log("Human restricted");
 			pass = false;
 		}
 
+		if(pass && command.masterOnly && bozoid.master.id != msg.author.id){
+			// console.log("Master restricted")
+			pass = false;
+		}
+
+		if(pass)
 		for(var listedUser of fileIO.read("blacklist.json").list){
 			if(listedUser.id == msg.author.id && !command.allowBlacklisted){
+				// console.log("User is blacklisted");
 				pass = false;
 				break;
 			}
 		}
 
 		if(pass && command.parameters)
-		for(var i = 0; i < command.parameters.length; i++){
+		for(var i = 0; i < command.parameters.length; i++){	//check each parameter (last check)
 			var parameter = command.parameters[i];
 
 			if(parameter.input){
-				// console.log("Input parameter, skipping...");
-				continue;	//If it's input, we don't need to check anything at all.
-			}
-
-			if(parameter.prefixed && config.cmdPref + parameter.keyword != parser.getArg(msg.content, i)){
-				// console.log("Prefixed keyword not met: " + parameter.keyword + ", skipping...");
-				pass = false;
-				break;
-			}
-			if(!parameter.prefixed && parameter.keyword != parser.getArg(msg.content, i)){
-				// console.log("Keyword not met: " + parameter.keyword + ", skipping...");
-				pass = false;
-				break;
+				if(!parsed.arguments[i]){
+					// console.log("Missing input parameter");
+					pass = false;
+					break;
+				}
+			} else{
+				if(parameter.keyword != parsed.arguments[i]){
+					// console.log("Keyword not met: " + parameter.keyword);
+					pass = false;
+					break;
+				}
 			}
 		}
 
+		//End checking section
+
 		if(pass){	//Finally, if the command really should be run, do stuff
-			// console.log("Passed! Running...");
+			// console.log("Passed.");
 			command.script(command, msg);
 		}
 	}
 });
 
 client.on('error', e => {
-	console.log("discord.js client error:");
+	console.log("Client error: ");
 	console.log(e);
 });
 
 client.on('ready', () => {
 	client.user.setPresence({
 		game: {
-			name: config.game,
+			name: bozoid.game,
 			type: 0
 		},
 		status: "online"
@@ -73,7 +88,7 @@ client.on('ready', () => {
 	console.log("Ready: " + client.user.tag);
 });
 
-client.login(config.token);
+client.login(bozoid.token);
 
 ////////////////
 
