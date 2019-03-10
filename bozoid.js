@@ -9,67 +9,74 @@ const bozoid = fileIO.read("bozoid.json");
 const parser = require("discord-command-parser");
 
 client.on('message', msg => {
-	console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")["
+	try{
+		console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")["
 	+ msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+	} catch(e){
+		console.log((process.uptime() + "").toHHMMSS() + " Something happened:\n" + JSON.stringify(e));
+	}
 
-	for(var command of commands.list.onMessage){
-		// console.log("Testing " + command.description);
+	(function(){
+		iterator: for(var command of commands.list.onMessage){
 
-		var parsed = parser.parse(msg, bozoid.cmdPref);
-		var pass = true;
+			// console.log("Testing " + command.description);
 
-		//Cascading checking section
+			var parsed = parser.parse(msg, bozoid.cmdPref);
 
-		if(pass && command.command && command.command != parsed.command){
-			// console.log("Wrong command");
-			pass = false;
-		}
+			//Cascading checking section
 
-		if(pass && !command.allowBot && msg.author.bot){
-			// console.log("Human restricted");
-			pass = false;
-		}
-
-		if(pass && command.masterOnly && bozoid.master.id != msg.author.id){
-			// console.log("Master restricted")
-			pass = false;
-		}
-
-		if(pass)
-		for(var listedUser of fileIO.read("blacklist.json").list){
-			if(listedUser.id == msg.author.id && !command.allowBlacklisted){
-				// console.log("User is blacklisted");
-				pass = false;
-				break;
+			if(command.command && command.command != parsed.command){
+				// console.log("Wrong command");
+				continue iterator;
 			}
-		}
 
-		if(pass && command.parameters)
-		for(var i = 0; i < command.parameters.length; i++){	//check each parameter (last check)
-			var parameter = command.parameters[i];
+			if(!command.allowBot && msg.author.bot){
+				// console.log("Human restricted");
+				continue iterator;
+			}
 
-			if(parameter.input){
-				if(!parsed.arguments[i]){
-					// console.log("Missing input parameter");
-					pass = false;
-					break;
-				}
-			} else{
-				if(parameter.keyword != parsed.arguments[i]){
-					// console.log("Keyword not met: " + parameter.keyword);
-					pass = false;
-					break;
+			if(command.masterOnly && bozoid.master.id != msg.author.id){
+				// console.log("Master restricted")
+				continue iterator;
+			}
+
+			for(var listedUser of fileIO.read("blacklist.json").list){
+				if(listedUser.id == msg.author.id && !command.allowBlacklisted){
+					// console.log("User is blacklisted");
+					continue iterator;
 				}
 			}
-		}
 
-		//End checking section
+			if(command.parameters){
+				if(command.parameters.length != parsed.arguments.length) {
+					msg.delete(10000);
+					msg.channel.send("Incorrect parameters").then(msg => {
+						msg.delete(10000);
+					});
+					continue iterator;
+				}
+				for(var i = 0; i < command.parameters.length; i++){	//check each parameter (last check)
+					var parameter = command.parameters[i];
 
-		if(pass){	//Finally, if the command really should be run, do stuff
-			// console.log("Passed.");
+					if(parameter.input){
+						if(!parsed.arguments[i]){
+							// console.log("Missing input parameter");
+							continue iterator;
+						}
+					} else{
+						if(parameter.keyword != parsed.arguments[i]){
+							// console.log("Keyword not met: " + parameter.keyword);
+							continue iterator;
+						}
+					}
+				}
+			}
+
+
+			//If the command should be run, do stuff
 			command.script(command, msg);
 		}
-	}
+	})();
 });
 
 client.on('error', e => {
