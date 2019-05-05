@@ -27,3 +27,6 @@ Montiey's personal Discord slave
 	* See [PM2 Docs](http://pm2.keymetrics.io/docs/usage/pm2-doc-single-page/) for more commands, such as:
 	* `$ pm2 list` to show all processes running under the current user, and get its ID
 	* `$ pm2 logs <id> --lines <# of lines>` to show the live log feed.
+
+* Utilities
+	* `backupconfig.sh` copies the configuration folder to `BozoidJS_Backup/` with a timestamp. Recommended to add to crontab as root.
