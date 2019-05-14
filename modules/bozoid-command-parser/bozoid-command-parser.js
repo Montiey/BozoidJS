@@ -2,6 +2,25 @@ const parser = require("bozoid-command-parser");
 const fileIO = require("bozoid-file-grabber");
 const bozoid = fileIO.read("bozoid.json");
 
+function startsWithAny(str, chars){
+	for(var i of chars){
+		if(str.startsWith(i)){
+			return true;
+		}
+	}
+	return false;
+}
+
+function indexOfAny(str, chars){
+	for(var i of chars){
+		var index = str.indexOf(i);
+		if(index){
+			return index;
+		}
+	}
+	return false;
+}
+
 exports.isBlacklisted = function(user){
 	for(var listed of blacklist.users){
 		if(listed.id == user.id){
@@ -14,9 +33,14 @@ exports.isBlacklisted = function(user){
 
 exports.getArg = function(str, index){	//Returns the string of an argument at an index
 	var tmpStr = str;
-	var separator = "\"";
+	var separators = [	//Quotes, iOS quotes, 
+		"\"",
+		"“",
+		"”"
+	];
+
 	for(var i = 0; i < index; i++){
-		while(!tmpStr.startsWith(separator)){
+		while(!startsWithAny(tmpStr, separators)){
 			tmpStr = tmpStr.substring(1);
 
 			if(tmpStr.length <= 1){
@@ -26,7 +50,7 @@ exports.getArg = function(str, index){	//Returns the string of an argument at an
 		}
 		tmpStr = tmpStr.substring(1);
 	}
-	var EOA = tmpStr.indexOf("\"");	//End of argument index
+	var EOA = indexOfAny(tmpStr, separators);	//End of argument index
 	if(EOA >= 0){
 		var oStr = tmpStr.substring(0, EOA);	//Excludes next space if index is -1
 		if(oStr.length > 0){
