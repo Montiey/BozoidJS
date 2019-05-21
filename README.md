@@ -5,7 +5,7 @@
 Montiey's personal Discord slave
 
 * Deployment on Ubuntu 16.04.5 LTS:
-	* `$ sudo su`	Best to do everything as root
+	* `$ sudo su`	Best to do everything as root (Except launching the bot, which should be done as a "safe", unpriveledged user)
 	* `$ apt-get update`	Good idea to update package indexes before installing anything
 	* `$ curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -`	Run the script, adding the proper PPA repository to the index.	(10.x wasn't working... 8.x works just fine)
 	* `$ apt-get install -y nodejs`	Install nodejs from the alternate repository; includes npm
