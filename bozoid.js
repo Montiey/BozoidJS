@@ -10,14 +10,15 @@ const parser = require("discord-command-parser");
 
 client.on('message', msg => {
 	try{
-		console.log((process.uptime() + "").toHHMMSS() + " (" + msg.member.guild + ")["
-	+ msg.channel.name + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+		console.log((process.uptime() + "").toHHMMSS() + " (" + (msg.member ? msg.member.guild : "<DM>") + ")["
+	+ (msg.member ? msg.channel.name : "<DM>") + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
 	} catch(e){
 		console.log((process.uptime() + "").toHHMMSS() + " Something happened:\n" + JSON.stringify(e));
+		throw(e);
 	}
 
 	(function(){
-		iterator: for(var command of commands.list.onMessage){
+		iterator: for(var command of commands.list.onMessage){	//TODO: Labels reee
 
 			// console.log("Testing " + command.description);
 
@@ -77,6 +78,19 @@ client.on('message', msg => {
 			command.script(command, msg);
 		}
 	})();
+});
+
+client.on('voiceStateUpdate', function(oldMember, newMember){
+	try{
+		console.log((process.uptime() + "").toHHMMSS() + " <User voice status change>");
+	} catch(e){
+		console.log((process.uptime() + "").toHHMMSS() + " Something happened:\n" + JSON.stringify(e));
+	}
+
+	for(var command of commands.list.onVoiceStateUpdate){
+		command.script(command, oldMember, newMember);
+	}
+
 });
 
 client.on('error', e => {

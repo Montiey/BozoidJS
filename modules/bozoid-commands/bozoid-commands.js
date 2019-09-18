@@ -512,6 +512,75 @@ exports.list = {
 					}
 				});
 			}
+		},
+		{
+			description: "Toggle voicechat activity notifications",
+			masterOnly: false,
+			command: "voicemon",
+			parameters: [
+			],
+			script: function(cmd, msg){
+
+				fileIO.update("voicemonitor.json", function(obj){
+					var exists = false;
+					var entry = null;
+					for(var listed of obj.list){
+						if(listed.id == msg.author.id){
+							exists = true;
+							entry = listed;
+							break;
+						}
+					}
+
+					if(!exists){
+						entry = {
+							referenceName: msg.author.username + "#" + msg.author.discriminator,
+							id: msg.author.id,
+							notificationsEnabled: true,
+							lastCheckTime: 0
+						}
+						obj.list.push(entry);
+						console.log("Created new entry for " + msg.author.id);
+					} else{
+						lastState = entry.notificationsEnabled;
+						newState = !lastState;
+						entry.notificationsEnabled = newState;
+
+						console.log("Changed notification state for " + msg.author.id + " " + lastState + " -> " + newState);
+					}
+
+					msg.channel.send("Voicechat activity notifications " + (entry.notificationsEnabled ? "`enabled`" : "`disabled`") + " for `" + entry.referenceName + "`");
+				});
+			}
+		}
+	],
+	onVoiceStateUpdate: [
+		{
+			script: function(cmd, oldMember, newMember){
+				if(newMember.voiceChannel == undefined || newMember.voiceChannel.members.size <= 1){
+					console.log("Voice channel not suitable, or doesn't exist")
+					return;
+				}
+
+				var now = (new Date).getTime();
+
+				fileIO.update("voicemonitor.json", function(obj){
+					for(var entryMember of obj.list){
+						var guildMember = newMember.voiceChannel.guild.members.get(entryMember.id);
+						if(!guildMember){
+							continue;	//The user in the entry list is not in this guild. Abort.
+						}
+
+						if(entryMember.id != newMember.id && entryMember.id == guildMember.id && entryMember.notificationsEnabled && now - entryMember.lastCheckTime >= 5*60000){
+							var numPeople = newMember.voiceChannel.members.size;
+
+							guildMember.user.send("Hey, there " + (numPeople == 1? "is" : "are") +  "`" + numPeople + "` " + (numPeople == 1 ? "person" : "people") + " in `" + newMember.voiceChannel.guild.name + " - " + newMember.voiceChannel.name + "`!");
+							// console.log("Sent ping to: " + guildMember.user.username);
+							entryMember.lastCheckTime = now;
+						}
+					}
+				});
+			}
 		}
 	]
 };
