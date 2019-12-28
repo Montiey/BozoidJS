@@ -552,6 +552,52 @@ exports.list = {
 					msg.channel.send("Voicechat activity notifications " + (entry.notificationsEnabled ? "`enabled`" : "`disabled`") + " for `" + entry.referenceName + "`");
 				});
 			}
+		},
+		{
+			description: "frick jar",
+			allowBot: true,
+			script: function(cmd, msg){
+				fricks = fileIO.read("fricks.json")["list"];
+				let justAdded = null;
+				for(let frick of fricks){
+					if(msg.content.includes(frick)){
+						console.log("Frick!");	
+						fileIO.update("frickjar.json", function(json){
+							for(var listedUser of json.list){
+								if(listedUser.id == msg.author.id){
+									console.log("User already listed");
+									justAdded = listedUser;
+										listedUser.total = (listedUser.total != undefined ? listedUser.total : 0) + 1;	//Add 1 to existing value or initialize it
+										return;
+								}
+							}
+							console.log("User not already listed");
+							justAdded = {
+								"id":msg.author.id,
+								"referenceName":msg.author.username + "#" + msg.author.discriminator,
+								"total":1
+							}
+							json.list.push(justAdded)
+						});
+						msg.channel.send("Frick Jar total for `" + justAdded.referenceName + "`: `$" + justAdded.total + "`");
+						break;
+					}
+				}
+			}
+		},
+		{
+			description: "add phrase to frick jar",
+			allowBot: false,
+			command: "addfrick",
+			parameters:[
+				{
+					input: true,
+					description: "phrase"
+				}
+			],
+			script: function(cmd, msg){
+				console.log("bleep blorp");
+			}
 		}
 	],
 	onVoiceStateUpdate: [
