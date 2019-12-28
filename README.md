@@ -4,6 +4,8 @@
 
 Montiey's personal Discord slave
 
+Notice: These are mostly just notes for when I forget about this project for a few months and then need to fix something. 
+
 * Deployment on Ubuntu 16.04.5 LTS:
 	* `$ sudo su`	Best to do everything as root (Except launching the bot, which should be done as a "safe", unpriveledged user)
 	* `$ apt-get update`	Good idea to update package indexes before installing anything
