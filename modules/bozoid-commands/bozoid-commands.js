@@ -571,10 +571,10 @@ exports.list = {
 							continue;	//The user in the entry list is not in this guild. Abort.
 						}
 
-						if(entryMember.id != newMember.id && entryMember.id == guildMember.id && entryMember.notificationsEnabled && now - entryMember.lastCheckTime >= 5*60000){
+						if(entryMember.id != newMember.id && entryMember.id == guildMember.id && entryMember.notificationsEnabled && now - entryMember.lastCheckTime >= 15*60*1000){
 							var numPeople = newMember.voiceChannel.members.size;
 
-							guildMember.user.send("Hey, there " + (numPeople == 1? "is" : "are") +  "`" + numPeople + "` " + (numPeople == 1 ? "person" : "people") + " in `" + newMember.voiceChannel.guild.name + " - " + newMember.voiceChannel.name + "`!");
+							guildMember.user.send("Hey, there " + (numPeople == 1? "is" : "are") +  " " + numPeople + " " + (numPeople == 1 ? "person" : "people") + " in " + newMember.voiceChannel.guild.name + " - " + newMember.voiceChannel.name + "!").then(msg => msg.delete(2*60*1000));
 							// console.log("Sent ping to: " + guildMember.user.username);
 							entryMember.lastCheckTime = now;
 						}
