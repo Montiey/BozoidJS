@@ -1,6 +1,6 @@
 # BozoidJS
 
-[INVITE LINK](https://discordapp.com/oauth2/authorize?client_id=406249641139634178&scope=bot&permissions=8)
+[INVITE LINK](https://discordapp.com/oauth2/authorize?client_id=406249641139634178&scope=bot&permissions=36822080)
 
 Montiey's personal Discord slave
 
