@@ -6,8 +6,7 @@ const client = new Discord.Client();
 const fileIO = require("bozoid-file-grabber");
 const commands = require("bozoid-commands");
 const bozoid = fileIO.read("bozoid.json");
-const parser = require("discord-command-parser");
-const bParser = require("bozoid-command-parser");
+const parser = require("freestyle-parser");
 
 client.on('message', function(msg){
 	try{
@@ -21,56 +20,58 @@ client.on('message', function(msg){
 
 			// console.log("Testing " + command.description);
 
-			var parsed = parser.parse(msg, bozoid.cmdPref);
-			
-
 			//Cascading checking section
 
-			if(command.command && command.command != parsed.command){
-				// console.log("Wrong command");
+			if(command.command && command.command != parser.getCommand(msg.content)){
+				//console.log("Wrong command: " + command.command + " != " + parser.getCommand(msg.content));
 				continue iterator;
 			}
 
 			if(!command.allowBot && msg.author.bot){
-				// console.log("Human restricted");
+				//console.log("Human restricted");
 				continue iterator;
 			}
 
 			if(command.masterOnly && bozoid.master.id != msg.author.id){
-				// console.log("Master restricted")
+				//console.log("Master restricted")
 				continue iterator;
 			}
 
 			for(var listedUser of fileIO.read("blacklist.json").list){
 				if(listedUser.id == msg.author.id && !command.allowBlacklisted){
-					// console.log("User is blacklisted");
+					//console.log("User is blacklisted");
 					continue iterator;
 				}
 			}
 
 			if(command.parameters){
-				if(command.parameters.length != parsed.arguments.length) {
+				let incorrect = false;
+				if(command.parameters.length > parser.getArgs(msg.content).length) {
 					msg.delete(10000);
-					msg.channel.send("Incorrect parameters").then(msg => {
-						msg.delete(10000);
-					});
-					continue iterator;
+					incorrect = true;
 				}
 				for(var i = 0; i < command.parameters.length; i++){	//check each parameter (last check)
 					var parameter = command.parameters[i];
 
 					if(parameter.input){
-						if(!parsed.arguments[i]){
-							// console.log("Missing input parameter");
-							continue iterator;
+						if(!parser.getArg(msg.content, i)){
+							//console.log("Missing input parameter");
+							incorrect = true;
 						}
 					} else{
-						if(parameter.keyword != parsed.arguments[i]){
-							// console.log("Keyword not met: " + parameter.keyword);
-							continue iterator;
+						if(parameter.keyword != parser.getArg(msg.content, i)){
+							//console.log("Keyword not met: " + parameter.keyword);
+							incorrect = true;
 						}
 					}
 				}
+				if(incorrect){
+					msg.channel.send("Incorrect parameters").then(msg => {
+						msg.delete(10000);
+					});
+					continue iterator;
+				}
+
 			}
 
 
@@ -123,17 +124,7 @@ client.on('ready', () => {
 
 client.login(bozoid.token);
 
-////////////////
 
-/*String.prototype.toHHMMSS = function () {
-    var sec_num = parseInt(this, 10);
-    var hours   = Math.floor(sec_num / 3600);
-    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    var seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-    if (hours   < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = "0"+minutes;}
-    if (seconds < 10) {seconds = "0"+seconds;}
-    var time    = hours+':'+minutes+':'+seconds;
-    return time;
-}*/
+
+//EOF

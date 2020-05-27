@@ -10,6 +10,7 @@
     "curlrequest": "^1.0.1",
     "discord-command-parser": "^1.3.3",
     "discord.js": "^11.5.1",
+    "freestyle-parser": "file:modules/freestyle-parser",
     "google-images": "^2.1.0",
     "jquery": "^3.4.1",
     "jsdom": "^16.2.0",

@@ -7,7 +7,7 @@ const googleImages = require("google-images");						////// Comment out if not us
 const imgClient = new googleImages(bozoid.CSEID, bozoid.CSEKey);			////// Comment out if not using the search engine
 
 const commands = require("bozoid-commands");
-const parser = require("discord-command-parser");
+const parser = require("freestyle-parser");
 const zalgo = require("to-zalgo");
 const numberConverter = require("number-to-words");
 
@@ -17,7 +17,7 @@ const {JSDOM} = jsdom;
 
 exports.list = {
 	onMessage: [
-		// {	//A command object, represents one action by the user
+		// {	//A command object, represents one action by the user	//TODO: Rewrite for freestyle
 		// 	description: "Sample",	//Human-readable name
 		// 	command: "sample",	//command name (i.e. '$sample' to trigger)
 		//	allowBot: false,	//Whether or not to allow bots to trigger this
@@ -61,8 +61,7 @@ exports.list = {
 			],
 			script: function(cmd, msg){
 				msg.delete(0);
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				msg.channel.send(parsed.arguments[0]);
+				msg.channel.send(parser.getFreestyle(msg.content, 0));
 			}
 		},
 		{
@@ -81,14 +80,12 @@ exports.list = {
 			script: function(cmd, msg){
 				msg.delete(0);
 
-				var maxSpams = 5;
+				var maxSpams = 8;
 
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-
-				var num = Math.min(parseInt(parsed.arguments[0]), maxSpams);
+				var num = Math.min(parseInt(parser.getArg(msg.content, 0)), maxSpams);
 
 				for(var i = 0; i < num; i++){
-					msg.channel.send(parsed.arguments[1]);
+					msg.channel.send(parser.getFreestyle(msg.content, 1));
 				}
 			}
 		},
@@ -104,8 +101,7 @@ exports.list = {
 			],
 			script: function(cmd, msg){
 				msg.delete(0);
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				msg.channel.send(zalgo(parsed.arguments[0]));
+				msg.channel.send(zalgo(parser.getFreestyle(msg.content, 0)));
 			}
 		},
 		{
@@ -120,8 +116,7 @@ exports.list = {
 			],
 			script: function(cmd, msg){
 				msg.delete(0);
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				var str = parsed.arguments[0].toLowerCase().match(/[a-z0-9]/g).join("");
+				var str = parser.getFreestyle(msg.content, 0).toLowerCase().match(/[a-z0-9]/g).join("");
 
 				var oStr = "";
 				var tempNew = "";
@@ -161,8 +156,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				var phrase = parsed.arguments[0];
+				var phrase = parser.getFreestyle(msg.content, 0);
 
 				fileIO.update("vocabulary.json", function(obj){
 					if(obj.list.indexOf(phrase) == -1){
@@ -185,8 +179,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				var phrase = parsed.arguments[0];
+				var phrase = parser.getFreestyle(msg.content, 0);
 				var index = 0;
 
 				fileIO.update("vocabulary.json", function(obj){
@@ -214,8 +207,7 @@ exports.list = {
 			script: function(cmd, msg){
 				console.log("Image search");
 				msg.channel.startTyping();
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				imgClient.search(parsed.arguments[0]).then(images => {
+				imgClient.search(parser.getFreestyle(msg.content, 0)).then(images => {
 					for(var test of images){
 						if(/(\.(gif|jpg|jpeg|tiff|png)$)/.test(test.url)){
 							msg.channel.send({
@@ -233,9 +225,10 @@ exports.list = {
 			masterOnly: true,
 			command: "restart",
 			script: function(cmd, msg){
-				msg.client.user.setStatus("invisible").then(console.log).catch(console.error);
-				msg.channel.send("Restarting...").then(function(){
-					process.exit(0);
+				msg.client.user.setStatus("invisible").then(function(){
+					msg.channel.send("Restarting...").then(function(){
+						process.exit(0);
+					});
 				});
 			}
 		},
@@ -243,10 +236,10 @@ exports.list = {
 			description: "Help",
 			command: "help",
 			script: function(cmd, msg){
-				//var oStr = "Built with Discord.js\nhttps://github.com/Montiey/BozoidJS\n";
+				let showAll = parser.getArg(msg.content, 0) === "all" ? true : false;
 				let oStr = "";
 				for(var command of commands.list.onMessage){
-					if(command.noHelp || command.masterOnly) continue;
+					if(command.noHelp || (command.masterOnly && !showAll)) continue;
 					var cmdStr = "";
 
 					cmdStr += "`" + bozoid.cmdPref + command.command;
@@ -300,11 +293,9 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				var reason = parsed.arguments[1];
+				var reason = parser.getFreestyle(msg.content, 1);
 				var byUser = msg.author;
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				msg.client.fetchUser(/[0-9]+/.exec(parsed.arguments[0])[0]).then(function(listedUser){
+				msg.client.fetchUser(/[0-9]+/.exec(parser.getArg(msg.content, 0))[0]).then(function(listedUser){
 					if(listedUser.id == msg.author.id){
 						msg.channel.send("You can't blacklist yourself, dummy");
 						return;
@@ -346,8 +337,7 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				var parsed = parser.parse(msg, bozoid.cmdPref);
-				msg.client.fetchUser(/[0-9]+/.exec(parsed.arguments[0])[0]).then(function(listedUser){
+				msg.client.fetchUser(/[0-9]+/.exec(parser.getArg(msg.content, 0))[0]).then(function(listedUser){
 					var exists = false;
 
 					fileIO.update("blacklist.json", function(json){
@@ -414,12 +404,11 @@ exports.list = {
 			],
 			script: function(cmd, msg){
 				console.log("Running responder add");
-				var parsed = parser.parse(msg, bozoid.cmdPref);
 
 				fileIO.update("responder.json", function(json){
 					var proceed = true;
-					var newTrigger = parsed.arguments[0].toLowerCase();;
-					var newResponse = parsed.arguments[1];
+					var newTrigger = parser.getArg(msg.content, 0).toLowerCase();
+					var newResponse = parser.getFreestyle(msg.content, 1);
 
 					for(var obj of json.list){
 						if(newTrigger == obj.trigger){
@@ -470,11 +459,10 @@ exports.list = {
 			],
 			script: function(cmd, msg){
 				fileIO.update("responder.json", function(json){
-					var parsed = parser.parse(msg, bozoid.cmdPref);
 
 					if(json.list)
 					for(var set of json.list){
-						if(set.trigger == parsed.arguments[0]){
+						if(set.trigger == parser.getArg(msg.content, 0)){
 							json.list.splice(json.list.indexOf(set), 1);
 
 							msg.channel.send("Removed.");
@@ -570,11 +558,11 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				let parsed = parser.parse(msg, bozoid.cmdPref);
-				console.log("Received frick phrase " + parsed.arguments[0]);
+				let phrase = parser.getFreestyle(msg.content, 0);
+				console.log("Received frick phrase " + phrase);
 				fileIO.update("fricks.json", function(json){
-					json.list.push(parsed.arguments[0]);
-					msg.channel.send("Added to list: `" + parsed.arguments[0] + "`");
+					json.list.push(phrase);
+					msg.channel.send("Added to list: `" + phrase + "`");
 				});
 			}
 		},
