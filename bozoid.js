@@ -7,6 +7,7 @@ const fileIO = require("bozoid-file-grabber");
 const commands = require("bozoid-commands");
 const bozoid = fileIO.read("bozoid.json");
 const parser = require("discord-command-parser");
+const bParser = require("bozoid-command-parser");
 
 client.on('message', function(msg){
 	try{
@@ -21,6 +22,7 @@ client.on('message', function(msg){
 			// console.log("Testing " + command.description);
 
 			var parsed = parser.parse(msg, bozoid.cmdPref);
+			
 
 			//Cascading checking section
 
@@ -90,7 +92,6 @@ client.on('voiceStateUpdate', function(oldMember, newMember){
 	}
 
 });
-
 
 client.on('presenceUpdate', function(oldMember, newMember){
 	try{

@@ -230,6 +230,7 @@ exports.list = {
 		},
 		{
 			description: "Restart",
+			masterOnly: true,
 			command: "restart",
 			script: function(cmd, msg){
 				msg.client.user.setStatus("invisible").then(console.log).catch(console.error);
@@ -242,9 +243,10 @@ exports.list = {
 			description: "Help",
 			command: "help",
 			script: function(cmd, msg){
-				var oStr = "Built with Discord.js\nhttps://github.com/Montiey/BozoidJS\n";
+				//var oStr = "Built with Discord.js\nhttps://github.com/Montiey/BozoidJS\n";
+				let oStr = "";
 				for(var command of commands.list.onMessage){
-					if(command.noHelp) continue;
+					if(command.noHelp || command.masterOnly) continue;
 					var cmdStr = "";
 
 					cmdStr += "`" + bozoid.cmdPref + command.command;
@@ -263,6 +265,7 @@ exports.list = {
 					cmdStr += "` " + command.description + "\n";
 					oStr += cmdStr;
 				}
+				oStr += "https://github.com/Montiey/BozoidJS\n";
 
 				if(oStr.length > 0){
 					msg.channel.send(oStr);
@@ -457,6 +460,7 @@ exports.list = {
 		},
 		{
 			description: "Remove a response set",
+			masterOnly: true,
 			command: "untrigger",
 			arguments: [
 				{
@@ -481,7 +485,7 @@ exports.list = {
 			}
 		},
 		{
-			description: "Toggle voicechat activity notifications",
+			description: "Be notified of voice channel activity",
 			masterOnly: false,
 			command: "voicemon",
 			parameters: [
@@ -536,8 +540,8 @@ exports.list = {
 								if(listedUser.id == msg.author.id){
 									console.log("User already listed");
 									justAdded = listedUser;
-										listedUser.total = (listedUser.total != undefined ? listedUser.total : 0) + 1;	//Add 1 to existing value or initialize it
-										return;
+									listedUser.total = (listedUser.total != undefined ? listedUser.total : 0) + 1;	//Add 1 to existing value or initialize it
+									return;
 								}
 							}
 							console.log("User not already listed");
@@ -575,7 +579,7 @@ exports.list = {
 			}
 		},
 		{
-			description: "Display frick jar statistics",
+			description: "Display your fricks",
 			allowBot: false,
 			command: "jar",
 			script: function(cmd, msg){
