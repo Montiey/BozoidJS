@@ -1,5 +1,7 @@
 #!/bin/bash
+#This script backs up the config files.
+
 NAME=Bozoid_Backup_Config_$(date +'%F_%T')
-DIR=/home/ubuntu/BozoidJS
-mkdir $DIR/../BozoidJS_Backup &> /dev/null
-cp -r $DIR/config $DIR/../BozoidJS_Backup/$NAME
+DIR=/home/montieyd/BozoidJS
+mkdir $DIR/backup &> /dev/null
+zip -r $DIR/backup/$NAME.zip $DIR/config

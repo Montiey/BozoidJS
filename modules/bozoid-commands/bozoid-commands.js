@@ -4,7 +4,7 @@ const fileIO = require("bozoid-file-grabber");
 const bozoid = fileIO.read("bozoid.json");
 
 const googleImages = require("google-images");						////// Comment out if not using the search engine
-const imgClient = new googleImages(bozoid.CSEID, bozoid.CSEKey);	////// "										"
+const imgClient = new googleImages(bozoid.CSEID, bozoid.CSEKey);			////// Comment out if not using the search engine
 
 const commands = require("bozoid-commands");
 const parser = require("discord-command-parser");
@@ -153,7 +153,7 @@ exports.list = {
 		{
 			description: "Add Vocabulary",
 			masterOnly: true,
-			command: "add",
+			command: "addvocab",
 			parameters: [
 				{
 					input: true,
@@ -177,7 +177,7 @@ exports.list = {
 		{
 			description: "Remove Vocabulary",
 			masterOnly: true,
-			command: "remove",
+			command: "delvocab",
 			parameters: [
 				{
 					input: true,
@@ -194,10 +194,11 @@ exports.list = {
 						if(value == phrase){
 							obj.list.splice(index, 1);
 							msg.channel.send("Removed: " + phrase);
-							break;
+							return;
 						}
 						index++;
 					}
+					msg.channel.send("Couldn't remove: " + phrase);
 				});
 			}
 		},
@@ -395,40 +396,6 @@ exports.list = {
 			}
 		},
 		{
-			description: "Pewdiepie vs TSeries",
-			command: "pewds",
-			script: function(cmd, msg){
-				function getSubs(user, callback){
-					msg.channel.startTyping();
-
-					curl.request({
-						url: "https://socialblade.com/youtube/user/" + user,
-						headers: {
-							accept: "*/*",	//TODO: Commenting interfearence?
-						}
-					}, function(err, resp){
-						if(err){
-							console.log(">>> ERROR: " + err);
-						} else{
-							const {window} = new JSDOM(resp);
-							var $ = require("jquery")(window);
-							callback(parseInt($("#youtube-stats-header-subs").text()));
-							msg.channel.stopTyping();
-						}
-					});
-				}
-
-				getSubs("tseries", function(tser){
-					setTimeout(function(){
-						getSubs("pewdiepie", function(pew){
-							console.log(pew + " " + tser);
-							msg.channel.send("Pewdiepie is currently ahead by: `" + (pew - tser) + "` subscribers");
-						});
-					}, 500);
-				});
-			}
-		},
-		{
 			description: "Add on-the-fly response",
 			masterOnly: true,
 			command: "trigger",
@@ -555,12 +522,14 @@ exports.list = {
 		},
 		{
 			description: "frick jar",
-			allowBot: true,
+			allowBot: false,
+			allowBlacklisted: true,
+			noHelp: true,
 			script: function(cmd, msg){
 				fricks = fileIO.read("fricks.json")["list"];
 				let justAdded = null;
 				for(let frick of fricks){
-					if(msg.content.includes(frick)){
+					if(msg.content.toLowerCase().includes(frick)){
 						console.log("Frick!");	
 						fileIO.update("frickjar.json", function(json){
 							for(var listedUser of json.list){
@@ -579,7 +548,7 @@ exports.list = {
 							}
 							json.list.push(justAdded)
 						});
-						msg.channel.send("Frick Jar total for `" + justAdded.referenceName + "`: `$" + justAdded.total + "`");
+						if(justAdded.total % 5 == 0) msg.channel.send("You said: `" + frick + "`!\nFrick Jar™ total for `" + justAdded.referenceName + "`: `$" + justAdded.total + "`");
 						break;
 					}
 				}
@@ -588,7 +557,8 @@ exports.list = {
 		{
 			description: "add phrase to frick jar",
 			allowBot: false,
-			command: "addfrick",
+			command: "addswear",
+			masterOnly: true,
 			parameters:[
 				{
 					input: true,
@@ -596,36 +566,154 @@ exports.list = {
 				}
 			],
 			script: function(cmd, msg){
-				console.log("bleep blorp");
+				let parsed = parser.parse(msg, bozoid.cmdPref);
+				console.log("Received frick phrase " + parsed.arguments[0]);
+				fileIO.update("fricks.json", function(json){
+					json.list.push(parsed.arguments[0]);
+					msg.channel.send("Added to list: `" + parsed.arguments[0] + "`");
+				});
+			}
+		},
+		{
+			description: "Display frick jar statistics",
+			allowBot: false,
+			command: "jar",
+			script: function(cmd, msg){
+				let json = fileIO.read("frickjar.json");
+				let thisEntry;
+				for(let entry of json.list){
+					if(entry.id == msg.author.id){
+						thisEntry = entry;
+						break;
+					}
+				}
+				let numFricks = (thisEntry != undefined ? thisEntry.total : 0);
+				msg.channel.send("Frick Jar™ total for `" + msg.author.username + "#" + msg.author.discriminator + "`: `$" + numFricks + "`");
+			}
+		},
+		{
+			description: "Log message statistics",
+			noHelp: true,
+			allowBot: true,
+			script: function(cmd, msg){
+				let now = (new Date()).getTime();
+				let userID = msg.author.id;
+				let userCommonName = msg.author.username = "#" + msg.author.discriminator;
+				fileIO.update("messagemonitor.json", function(obj){
+					if(obj[userID] == undefined){
+						obj[userID] = {
+							"list":[]
+						}
+					}
+					
+					obj[userID].list.push({
+						"time":now,
+						"contents":msg.content,
+						"guild":msg.guild != undefined ? msg.guild.id : null	//Message may not be in a guild
+					});
+				});
 			}
 		}
 	],
 	onVoiceStateUpdate: [
 		{
-			script: function(cmd, oldMember, newMember){
-				if(newMember.voiceChannel == undefined || newMember.voiceChannel.members.size <= 1){
-					console.log("Voice channel not suitable, or doesn't exist")
+			script: function(cmd, oldMember, newMember){	//Voice channel activity tracker and notifier
+				let minPeople = 2;
+				let timeInterval = 45*60*1000;
+				let deleteDelay = 30*60*1000;
+				//let timeInterval = 0;
+				if(oldMember.voiceChannel != undefined || newMember.voiceChannel == undefined || newMember.voiceChannel.members.size < minPeople){
+					//console.log("Voice channel not suitable, or doesn't exist") //Something went wrong
 					return;
 				}
 
-				var now = (new Date).getTime();
+				let now = (new Date).getTime();
 
 				fileIO.update("voicemonitor.json", function(obj){
-					for(var entryMember of obj.list){
-						var guildMember = newMember.voiceChannel.guild.members.get(entryMember.id);
-						if(!guildMember){
-							continue;	//The user in the entry list is not in this guild. Abort.
+					for(let receivingMember of obj.list){
+						let guildMember = newMember.voiceChannel.guild.members.get(receivingMember.id);
+						if(!guildMember) continue;	//The user in the entry list is not in this guild. Abort.
+						
+
+						let valid = true;
+						for(let [joinedMemberID, joinedMember] of newMember.voiceChannel.members){
+							//console.log("In: " + joinedMemberID);
+							if(joinedMemberID == receivingMember.id){
+								//console.log("Not sending to: " + receivingMember.id);
+								valid = false;
+								break;
+							}
 						}
+							
 
-						if(entryMember.id != newMember.id && entryMember.id == guildMember.id && entryMember.notificationsEnabled && now - entryMember.lastCheckTime >= 15*60*1000){
+						if(
+							valid &&
+							receivingMember.notificationsEnabled &&
+							now - receivingMember.lastCheckTime >= timeInterval
+						){
+							//console.log("True? " + valid);
 							var numPeople = newMember.voiceChannel.members.size;
-
-							guildMember.user.send("Hey, there " + (numPeople == 1? "is" : "are") +  " " + numPeople + " " + (numPeople == 1 ? "person" : "people") + " in " + newMember.voiceChannel.guild.name + " - " + newMember.voiceChannel.name + "!").then(msg => msg.delete(2*60*1000));
-							// console.log("Sent ping to: " + guildMember.user.username);
-							entryMember.lastCheckTime = now;
+							guildMember.user.send(numPeople + " user(s) in " + newMember.voiceChannel.guild.name + " - " + newMember.voiceChannel.name + "!").then(msg => msg.delete(deleteDelay));
+							//console.log("Sent ping to: " + guildMember.user.username + "#" + guildMember.user.discriminator);
+							receivingMember.lastCheckTime = now;
+						} else{
+							//console.log("not: " + receivingMember.id);
 						}
 					}
 				});
+			}
+		}
+	],
+	onPresenceUpdate: [
+		{
+			script: function(cmd, oldMember, newMember){	//User status tracker
+				let oldStatus = oldMember.presence.status;
+				let newStatus = newMember.presence.status;
+				
+				if(oldStatus != newStatus){
+					let thisID = newMember.id;
+					let thisName = newMember.user.username + "#" + newMember.user.discriminator;	//TODO: Fix #1234#1234
+					//console.log(newMember.user.username + "\n" + oldMember.user.username);
+						
+					fileIO.update("presencemonitor.json", function(obj){
+						//console.log(newMember.user.username + "\n" + oldMember.user.username);
+						
+						if(obj[thisID] == undefined) obj[thisID] = {};
+						let entry = obj[thisID];
+						if(entry.list == undefined) entry.list = [];
+						if(entry.names == undefined) entry.names = [];
+
+
+						let now = (new Date).getTime();
+
+						//If not a duplicate from multiple guilds
+						if(entry.list.length == 0 || entry.list[entry.list.length-1].newStatus != newStatus){
+							console.log(new Date().toISOString() + " (" + thisID + ")<" + thisName + "> " + oldStatus + " -> " + newStatus);
+							entry.list.push({
+								"time":now,
+								"oldStatus":oldStatus,
+								"newStatus":newStatus
+							});
+						} else{
+							//console.log("Skipping duplicate");
+						}
+						
+						if(entry.names.length == 0 || entry.names[entry.names.length-1] != thisName){
+							entry.names.push(thisName);
+						} else{
+							//console.log("Skipping duplicate name");
+						}
+
+						//if(newMember.user.username == ("#" + newMember.user.discriminator)){
+							//console.log("NAME ERROR\n" + newMember.user.username + "\n" +
+						//		oldMember.user.username + "\n" + 
+						//		newMember.user.discriminator + "\n" + 
+						//		oldMember.user.discriminator);
+						//}
+					});
+				} else{
+					//console.log("Other presence status change");
+				}
 			}
 		}
 	]

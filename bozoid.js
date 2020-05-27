@@ -8,16 +8,14 @@ const commands = require("bozoid-commands");
 const bozoid = fileIO.read("bozoid.json");
 const parser = require("discord-command-parser");
 
-client.on('message', msg => {
+client.on('message', function(msg){
 	try{
-		console.log((process.uptime() + "").toHHMMSS() + " (" + (msg.member ? msg.member.guild : "<DM>") + ")["
-	+ (msg.member ? msg.channel.name : "<DM>") + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+		console.log(new Date().toISOString() + " (" + (msg.member ? msg.member.guild : "<DM>") + ")[" + (msg.member ? msg.channel.name : msg.channel.recipient.username + "#" + msg.channel.recipient.discriminator) + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
 	} catch(e){
-		console.log((process.uptime() + "").toHHMMSS() + " Something happened:\n" + JSON.stringify(e));
-		throw(e);
+		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
 	}
 
-	(function(){
+	(function(){	//TODO: Why is this wrapped? Return?
 		iterator: for(var command of commands.list.onMessage){	//TODO: Labels reee
 
 			// console.log("Testing " + command.description);
@@ -82,15 +80,28 @@ client.on('message', msg => {
 
 client.on('voiceStateUpdate', function(oldMember, newMember){
 	try{
-		console.log((process.uptime() + "").toHHMMSS() + " <User voice status change>");
+		//console.log(new Date().toISOString() + " (" + newMember.id + ")<" + newMember.user.username + "#" + newMember.user.discriminator + "> Voice Update");	
 	} catch(e){
-		console.log((process.uptime() + "").toHHMMSS() + " Something happened:\n" + JSON.stringify(e));
+		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
 	}
 
 	for(var command of commands.list.onVoiceStateUpdate){
 		command.script(command, oldMember, newMember);
 	}
 
+});
+
+
+client.on('presenceUpdate', function(oldMember, newMember){
+	try{
+		//console.log(new Date().toISOString() + " (" + newMember.id + ")<" + newMember.user.username + "#" + newMember.user.discriminator + "> Presence Update");
+	} catch(e){
+		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
+	}
+
+	for(var command of commands.list.onPresenceUpdate){
+		command.script(command, oldMember, newMember);
+	}
 });
 
 client.on('error', e => {
@@ -113,7 +124,7 @@ client.login(bozoid.token);
 
 ////////////////
 
-String.prototype.toHHMMSS = function () {
+/*String.prototype.toHHMMSS = function () {
     var sec_num = parseInt(this, 10);
     var hours   = Math.floor(sec_num / 3600);
     var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
@@ -124,4 +135,4 @@ String.prototype.toHHMMSS = function () {
     if (seconds < 10) {seconds = "0"+seconds;}
     var time    = hours+':'+minutes+':'+seconds;
     return time;
-}
+}*/
