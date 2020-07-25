@@ -94,12 +94,22 @@ client.on('voiceStateUpdate', function(oldMember, newMember){
 
 });
 
+
+
+
+let presenceGuildStore = {};
+
 client.on('presenceUpdate', function(oldMember, newMember){
 	try{
 		//console.log(new Date().toISOString() + " (" + newMember.id + ")<" + newMember.user.username + "#" + newMember.user.discriminator + "> Presence Update");
 	} catch(e){
 		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
 	}
+
+
+	if(newMember.presence.status == presenceGuildStore[newMember.id]) return;	//TODO: This invalidates all use cases that depend on a guild in context to a presence update, in favor of emulating a single presence update without a practical guild relation.
+
+	presenceGuildStore[newMember.id] = newMember.presence.status;
 
 	for(var command of commands.list.onPresenceUpdate){
 		command.script(command, oldMember, newMember);
