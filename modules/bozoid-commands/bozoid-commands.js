@@ -15,6 +15,19 @@ const curl = require("curlrequest");
 const jsdom = require("jsdom");
 const {JSDOM} = jsdom;
 
+const mysql = require('mysql');
+const moment = require('moment');
+
+
+let sqlConnection = mysql.createConnection({	//TODO: Where to put this?
+	host: 'localhost',
+	user: 'root',
+	password: '61gd4t4',
+	database: 'BozoidDatabase',
+	acquireTimout: 5*60*1000
+});
+
+
 exports.list = {
 	onMessage: [
 		// {	//A command object, represents one action by the user	//TODO: Rewrite for freestyle
@@ -646,6 +659,11 @@ exports.list = {
 			}
 		}
 	],
+
+
+
+
+
 	onVoiceStateUpdate: [
 		{
 			script: function(cmd, oldMember, newMember){	//Voice channel activity tracker and notifier
@@ -698,49 +716,27 @@ exports.list = {
 	onPresenceUpdate: [
 		{
 			script: function(cmd, oldMember, newMember){	//User status tracker
-				let oldStatus = oldMember.presence.status;
-				let newStatus = newMember.presence.status;
+				function convStatus(old){
+					switch(old){
+						case 'online': return 'onl'; break;
+						case 'idle': return 'idl'; break;
+						case 'dnd': return 'dnd'; break;
+						case 'offline': return 'ofl'; break;
+					}
+				}
+
+				let oldStatus = convStatus(oldMember.presence.status);
+				let newStatus = convStatus(newMember.presence.status);
 				
-				if(oldStatus != newStatus){
+				if(oldStatus != newStatus){	//TODO: Note: bozoid.js re-purposes onPresenceUpdate for unique status changes. Redundant check?
 					let thisID = newMember.id;
 					let thisName = newMember.user.username + "#" + newMember.user.discriminator;	//TODO: Fix #1234#1234
-					//console.log(newMember.user.username + "\n" + oldMember.user.username);
-						
-					fileIO.update("presencemonitor.json", function(obj){
-						//console.log(newMember.user.username + "\n" + oldMember.user.username);
-						
-						if(obj[thisID] == undefined) obj[thisID] = {};
-						let entry = obj[thisID];
-						if(entry.list == undefined) entry.list = [];
-						if(entry.names == undefined) entry.names = [];
+					console.log(thisID + ' ' + oldStatus + ' > ' + newStatus);
+					let now = (new Date).getTime();
+					let arr = [thisID, newStatus, oldStatus, (new moment(now)).format('YYYY-MM-DD HH:mm:ss')]
 
-
-						let now = (new Date).getTime();
-
-						//If not a duplicate from multiple guilds
-						if(entry.list.length == 0 || entry.list[entry.list.length-1].newStatus != newStatus){
-							console.log(new Date().toISOString() + " (" + thisID + ")<" + thisName + "> " + oldStatus + " -> " + newStatus);
-							entry.list.push({
-								"time":now,
-								"oldStatus":oldStatus,
-								"newStatus":newStatus
-							});
-						} else{
-							//console.log("Skipping duplicate");
-						}
-						
-						if(entry.names.length == 0 || entry.names[entry.names.length-1] != thisName){
-							entry.names.push(thisName);
-						} else{
-							//console.log("Skipping duplicate name");
-						}
-
-						//if(newMember.user.username == ("#" + newMember.user.discriminator)){
-							//console.log("NAME ERROR\n" + newMember.user.username + "\n" +
-						//		oldMember.user.username + "\n" + 
-						//		newMember.user.discriminator + "\n" + 
-						//		oldMember.user.discriminator);
-						//}
+					sqlConnection.query("INSERT INTO Presence(id, newStatus, oldStatus, time) VALUES(?, ?, ?, ?)", arr, function(e, r, f){
+						if(e) throw e;
 					});
 				} else{
 					//console.log("Other presence status change");
