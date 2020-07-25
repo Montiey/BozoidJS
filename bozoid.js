@@ -119,7 +119,7 @@ client.on('ready', () => {
 		},
 		status: "online"
 	});
-	console.log("Ready: " + client.user.tag);
+	console.log("Ready: " + client.user.tag + " @ " + (new Date()).toISOString());
 });
 
 client.login(bozoid.token);
