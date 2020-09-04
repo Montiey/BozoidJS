@@ -103,6 +103,30 @@ exports.list = {
 			}
 		},
 		{
+			description: "1337 t3xt g3n3r4t0r",
+			allowBot: true,
+			command: "leet",
+			parameters: [
+				{
+					input: true,
+					description: "phrase"
+				}
+			],
+			script: function(cmd, msg){
+				msg.delete(0);
+
+				table = [
+					"a4", "b6", "e3", "g9", "i1", "l1", "o0", "s5", "t7"
+				]
+
+				input = parser.getFreestyle(msg.content, 0).toLowerCase();
+
+				for(set of table) input = input.replace(new RegExp(set[0], 'g'), set[1]);
+
+				msg.channel.send(input.toUpperCase());
+			}
+		},
+		{
 			description: "Zalgo Generator",
 			allowBot: true,
 			command: "zalgo",
@@ -738,6 +762,27 @@ exports.list = {
 					sqlConnection.query("INSERT INTO Presence(id, newStatus, oldStatus, time) VALUES(?, ?, ?, ?)", arr, function(e, r, f){
 						if(e) throw e;
 					});
+
+
+					sqlConnection.query("SELECT * FROM Names WHERE id=?", [thisID], function(e, r, f){
+						if(e) throw e;
+						
+						let exists = false;
+						for(let entry of r){
+							if(entry.name == thisName){
+								exists = true;
+								break;
+							}
+						}
+
+						if(exists) return;
+
+						console.log("Logging new name for " +thisID + " " + thisName);
+					
+						sqlConnection.query("INSERT INTO Names(id, name) VALUES(?, ?)", [thisID, thisName], function(e, r, f){
+							if(e) throw e;
+						});
+					});	
 				} else{
 					//console.log("Other presence status change");
 				}
