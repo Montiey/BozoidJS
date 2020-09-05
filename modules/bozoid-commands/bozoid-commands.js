@@ -22,8 +22,8 @@ const moment = require('moment');
 let sqlConnection = mysql.createConnection({	//TODO: Where to put this?
 	host: 'localhost',
 	user: 'root',
-	password: '61gd4t4',
-	database: 'BozoidDatabase',
+	password: bozoid.databasePassword,
+	database: bozoid.databaseName,
 	acquireTimout: 5*60*1000
 });
 
@@ -752,10 +752,12 @@ exports.list = {
 				let oldStatus = convStatus(oldMember.presence.status);
 				let newStatus = convStatus(newMember.presence.status);
 				
-				if(oldStatus != newStatus){	//TODO: Note: bozoid.js re-purposes onPresenceUpdate for unique status changes. Redundant check?
+				if(oldStatus != newStatus){
 					let thisID = newMember.id;
 					let thisName = newMember.user.username + "#" + newMember.user.discriminator;	//TODO: Fix #1234#1234
-					console.log(thisID + ' ' + oldStatus + ' > ' + newStatus);
+					thisName = thisName.replace(/[^\x00-\x7F]/g, "?");
+
+					console.log(thisID + ' ' + oldStatus + ' > ' + newStatus + " aka " + thisName);
 					let now = (new Date).getTime();
 					let arr = [thisID, newStatus, oldStatus, (new moment(now)).format('YYYY-MM-DD HH:mm:ss')]
 
