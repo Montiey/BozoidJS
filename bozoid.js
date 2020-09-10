@@ -2,56 +2,66 @@ global.__basedir = __dirname;	//Set __basedir to this directory (project root)
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
+const fs = require('fs');
 const fileIO = require("bozoid-file-grabber");
-const commands = require("bozoid-commands");
 const bozoid = fileIO.read("bozoid.json");
 const parser = require("freestyle-parser");
+const loader = require('bozoid-command-loader');
 
+
+
+
+////////
 client.on('message', function(msg){
 	try{
-		console.log(new Date().toISOString() + " (" + (msg.member ? msg.member.guild : "<DM>") + ")[" + (msg.member ? msg.channel.name : msg.channel.recipient.username + "#" + msg.channel.recipient.discriminator) + "]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content);
+		console.log(new Date().toISOString() + " (" +
+		(msg.member ? msg.member.guild : "<DM>") + ")[" +
+		(msg.member ? msg.channel.name : msg.channel.recipient.username + "#" +
+		msg.channel.recipient.discriminator) + "]<" +
+		msg.author.username + "#" + msg.author.discriminator + "> " +
+		msg.content);
 	} catch(e){
 		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
 	}
 
-	(function(){	//TODO: Why is this wrapped? Return?
-		iterator: for(var command of commands.list.onMessage){	//TODO: Labels reee
-
-			// console.log("Testing " + command.description);
+	(function(){
+		iterator: for(var cmdModule of loader.commandStore.onMessage){	//TODO: labels reeee
+			//console.log("Testing " + command.description);
 
 			//Cascading checking section
 
-			if(command.command && command.command != parser.getCommand(msg.content)){
-				//console.log("Wrong command: " + command.command + " != " + parser.getCommand(msg.content));
+			if(cmdModule.command && cmdModule.command != parser.getCommand(msg.content)){
+				//console.log("Wrong command: " + cmdModule.command + " != " + parser.getCommand(msg.content));
 				continue iterator;
 			}
 
-			if(!command.allowBot && msg.author.bot){
+			if(!cmdModule.allowBot && msg.author.bot){
 				//console.log("Human restricted");
 				continue iterator;
 			}
 
-			if(command.masterOnly && bozoid.master.id != msg.author.id){
+			if(cmdModule.masterOnly && bozoid.master.id != msg.author.id){
 				//console.log("Master restricted")
 				continue iterator;
 			}
 
 			for(var listedUser of fileIO.read("blacklist.json").list){
-				if(listedUser.id == msg.author.id && !command.allowBlacklisted){
+				if(listedUser.id == msg.author.id && !cmdModule.allowBlacklisted){
 					//console.log("User is blacklisted");
 					continue iterator;
 				}
 			}
 
-			if(command.parameters){
+			if(cmdModule.parameters){
 				let incorrect = false;
-				if(command.parameters.length > parser.getArgs(msg.content).length) {
+				if(cmdModule.parameters.length > parser.getArgs(msg.content).length) {
 					msg.delete(10000);
 					incorrect = true;
 				}
-				for(var i = 0; i < command.parameters.length; i++){	//check each parameter (last check)
-					var parameter = command.parameters[i];
+
+				//check each parameter (last check)
+				for(var i = 0; i < cmdModule.parameters.length; i++){
+					var parameter = cmdModule.parameters[i];
 
 					if(parameter.input){
 						if(!parser.getArg(msg.content, i)){
@@ -76,10 +86,17 @@ client.on('message', function(msg){
 
 
 			//If the command should be run, do stuff
-			command.script(command, msg);
+			cmdModule.script(cmdModule, msg);
 		}
 	})();
 });
+
+
+
+
+
+
+////////
 
 client.on('voiceStateUpdate', function(oldMember, newMember){
 	try{
@@ -88,14 +105,17 @@ client.on('voiceStateUpdate', function(oldMember, newMember){
 		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
 	}
 
-	for(var command of commands.list.onVoiceStateUpdate){
-		command.script(command, oldMember, newMember);
+	for(var cmdModule of loader.commandStore.onVoiceStatusUpdate){
+		cmdModule.script(cmdModule, oldMember, newMember);
 	}
-
 });
 
 
 
+
+
+
+////////
 
 let presenceGuildStore = {};
 
@@ -111,10 +131,18 @@ client.on('presenceUpdate', function(oldMember, newMember){
 
 	presenceGuildStore[newMember.id] = newMember.presence.status;
 
-	for(var command of commands.list.onPresenceUpdate){
-		command.script(command, oldMember, newMember);
+	for(let cmdModule of loader.commandStore.onPresenceUpdate){
+		cmdModule.script(cmdModule, oldMember, newMember);
 	}
 });
+
+
+
+
+
+
+
+//////////
 
 client.on('error', e => {
 	console.log("Client error: ");
@@ -132,6 +160,8 @@ client.on('ready', () => {
 	console.log("Ready: " + client.user.tag + " @ " + (new Date()).toISOString());
 });
 
+
+loader.loadFrom('./commands');
 client.login(bozoid.token);
 
 

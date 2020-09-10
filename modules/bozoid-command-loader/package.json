@@ -1,8 +1,8 @@
 {
-  "name": "bozoid-commands",
+  "name": "bozoid-command-loader",
   "version": "1.0.0",
   "description": "",
-  "main": "bozoid-commands.js",
+  "main": "bozoid-command-loader.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
