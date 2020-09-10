@@ -12,7 +12,7 @@
     "discord.js": "^11.5.1",
     "freestyle-parser": "file:modules/freestyle-parser",
     "google-images": "^2.1.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "jsdom": "^16.2.0",
     "moment": "^2.27.0",
     "mysql": "^2.18.1",
