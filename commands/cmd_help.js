@@ -16,21 +16,19 @@ exports.script = function(cmd, msg){
 		if(command.noHelp || (command.masterOnly && !showAll)) continue;
 		var cmdStr = "";
 
-		cmdStr += "`" + bozoid.cmdPref + command.command;
+		cmdStr += "**`" + bozoid.cmdPref + command.command;
 
 		if(command.parameters){
-			cmdStr += " ";
 			for(var p of command.parameters){
 				if(p.input){
-					//cmdStr += "\"" + p.description + "\" ";
-					cmdStr += p.description + ' ';
+					cmdStr += ' ' + p.description;
 				} else{
-					cmdStr += p.keyword + " ";
+					cmdStr += ' ' + p.keyword;
 				}
 			}
 		}
 
-		cmdStr += "` " + command.description;
+		cmdStr += "`** " + command.description;
 
 		if(command.masterOnly) cmdStr += "*";
 

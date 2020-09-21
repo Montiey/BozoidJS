@@ -1,7 +1,7 @@
 const parser = require('freestyle-parser');
 
 exports.eventGroup = 'onMessage';
-exports.description = 'say';
+exports.description = 'Say';
 exports.command = 'say';
 exports.parameters = [
 	{

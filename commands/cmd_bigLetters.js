@@ -1,13 +1,13 @@
 const parser = require('freestyle-parser');
 
 exports.eventGroup = 'onMessage';
-exports.description = 'Big Letters';
+exports.description = ':b:ig :regional_indicator_l:etters';
 exports.allowBot = false;
 exports.command = 'big';
 exports.parameters = [
 	{
 		input: true,
-		description: 'Phrase'
+		description: 'phrase'
 	}
 ];
 

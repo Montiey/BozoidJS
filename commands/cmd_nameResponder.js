@@ -7,7 +7,8 @@ exports.script = function(cmd, msg){
 	let vocab = fileIO.read('vocabulary.json').list;
 	for(let aka of fileIO.read('bozoid.json').names){
 		if(msg.content.toLowerCase().includes(aka.toLowerCase())){
-			msg.channel.send(vocab[Math.floor(Math.random() * vocab.length)]);
+			phrase = vocab[Math.floor(Math.random() * vocab.length)]
+			msg.channel.send(phrase);
 			break;
 		}
 	}
