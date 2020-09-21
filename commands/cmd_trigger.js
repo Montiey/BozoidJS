@@ -38,11 +38,14 @@ exports.script = function(cmd, msg){
 		}
 
 		if(proceed){
-			msg.channel.send("Added.");
+			//msg.channel.send("Added.");
+			msg.react("👌");
 			json.list.push({
 				trigger: newTrigger,
 				response: newResponse
 			});
+		} else{
+			msg.react("👎");
 		}
 	});
 };

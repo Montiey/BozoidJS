@@ -18,7 +18,19 @@ exports.script = function(cmd, msg){
 	let phrase = parser.getFreestyle(msg.content, 0);
 	console.log("Received frick phrase " + phrase);
 	fileIO.update("fricks.json", function(json){
-		json.list.push(phrase);
-		msg.channel.send("Added to list: `" + phrase + "`");
+		let exists = false;
+		for(entry of json.list){
+			if(entry.toLowerCase() == phrase.toLowerCase()){
+				exists = true;
+				break;
+			}
+		}
+		if(!exists){
+			json.list.push(phrase);
+			//msg.channel.send("Added to list: `" + phrase + "`");
+			msg.react("👌");
+		} else{
+			msg.react("👎");
+		}
 	});
 };

@@ -17,14 +17,23 @@ exports.parameters = [
 exports.script = function(cmd, msg){
 	fileIO.update("responder.json", function(json){
 
+		let succ = false;
+
 		if(json.list)
 		for(var set of json.list){
 			if(set.trigger == parser.getArg(msg.content, 0)){
 				json.list.splice(json.list.indexOf(set), 1);
 
-				msg.channel.send("Removed.");
+				//msg.channel.send("Removed.");
+				msg.react("👌");
+				succ = true;
 				break;
 			}
+		}
+
+
+		if(!succ){
+			msg.react("👎");
 		}
 	});
 }

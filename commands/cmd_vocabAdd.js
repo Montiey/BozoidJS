@@ -18,9 +18,11 @@ exports.script = function(cmd, msg){
 	fileIO.update("vocabulary.json", function(obj){
 		if(obj.list.indexOf(phrase) == -1){
 			obj.list.push(phrase);
-			msg.channel.send("Added to vocabulary: " + phrase);
+			//msg.channel.send("Added to vocabulary: " + phrase);
+			msg.react("👌");
 		} else{
-			msg.channel.send("Already added");
+			//msg.channel.send("Already added");
+			msg.react("👎");
 		}
 	});
 }

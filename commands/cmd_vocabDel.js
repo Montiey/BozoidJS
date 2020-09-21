@@ -20,11 +20,13 @@ exports.script = function(cmd, msg){
 		for(var value of obj.list){
 			if(value == phrase){
 				obj.list.splice(index, 1);
-				msg.channel.send("Removed: " + phrase);
+				//msg.channel.send("Removed: " + phrase);
+				msg.react("👌");
 				return;
 			}
 			index++;
 		}
-		msg.channel.send("Couldn't remove: " + phrase);
+		//msg.channel.send("Couldn't remove: " + phrase);
+		msg.react("👎");
 	});
 }
