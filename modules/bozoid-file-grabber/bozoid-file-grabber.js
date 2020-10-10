@@ -33,7 +33,7 @@ exports.read = function(path){
 		if(time > maxTime) console.log("[grabber] read " + path + " in " + time);
 		return ret;
 	} else{
-		console.log("Read: File doesn't exist");
+		console.log("Read: File doesn't exist: " + path);
 		return;
 	}
 }
