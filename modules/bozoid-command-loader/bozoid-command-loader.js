@@ -3,7 +3,8 @@ const fs = require('fs');
 exports.commandStore = {
 	"onMessage":[],
 	"onPresenceUpdate":[],
-	"onVoiceStatusUpdate":[]
+	"onVoiceStatusUpdate":[],
+	"onSchedule":[]
 };
 
 exports.loadFrom = function(loadDir){
@@ -11,10 +12,10 @@ exports.loadFrom = function(loadDir){
 
 	fs.readdirSync(realDir).filter(file => /^cmd_.*\.js$/.test(file)).forEach(function(file){
 		//let command = file.substr(file.indexOf('cmd_') + 4, file.indexOf('.js'));
-		console.log("Loading " + file + "...");
 		try{
 			let cmdModule = require(realDir + '/' + file);
 			exports.commandStore[cmdModule.eventGroup].push(cmdModule);
+			console.log("Loaded [" + cmdModule.eventGroup + "] " + file)
 		} catch(e){
 			console.log("!! Couldn't load " + file + "!!")
 		}

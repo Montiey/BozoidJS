@@ -16,6 +16,11 @@ exports.script = function(cmd, msg){
 
 	let numGuilds = msg.client.guilds.size
 	let numChannels = msg.client.channels.size
+	let numUsers = 0
+
+	for(let g of msg.client.guilds.array()){
+		numUsers+= g.members.array().length
+	}
 
 	bozAge = (new Date().getTime()) - (new Date('2018-01-25')).getTime()
 
@@ -24,6 +29,7 @@ exports.script = function(cmd, msg){
 	oStr += 'Age: ' + '`' + Math.floor(bozAge / (1000*60*60*24)) + '` days\n'
 	oStr += 'Servers currently joined: `' + numGuilds + '`\n'
 	oStr += 'Channels currently monitored: `' + numChannels + '`\n'
+	oStr += 'Users currently monitored: `' + numUsers + '`\n'
 	oStr += 'Total users blacklisted: `' + stat_blacklist + '`\n'
 	oStr += 'Total users caught swearing: `' + stat_frickjar + '`\n'
 	oStr += 'Known swears: `' + stat_fricks + '`\n'

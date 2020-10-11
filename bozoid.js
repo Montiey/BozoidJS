@@ -113,8 +113,6 @@ client.on('voiceStateUpdate', function(oldMember, newMember){
 
 
 
-
-
 ////////
 
 let presenceGuildStore = {};
@@ -142,12 +140,32 @@ client.on('presenceUpdate', function(oldMember, newMember){
 
 
 
-//////////
+
+
+
+
+
+
+
+
+////////////
+
 
 client.on('error', e => {
 	console.log("Client error: ");
 	console.log(e);
 });
+
+
+
+
+
+
+
+//////
+
+
+
 
 client.on('ready', () => {
 	client.user.setPresence({
@@ -162,8 +180,27 @@ client.on('ready', () => {
 
 
 loader.loadFrom('./commands');
-client.login(bozoid.token);
 
+
+
+
+
+
+client.login(bozoid.token).then(function(){
+
+
+	for(let schedModule of loader.commandStore.onSchedule){
+		let interval = schedModule.interval
+		if(!interval || interval < 100){
+			console.log("Bad schedule interval: " + interval + "?")
+			continue
+		}
+		console.log("Scheduled interval: " + interval)
+		schedModule.timer = setInterval(function(){
+			schedModule.script(client)
+		}, interval);
+	}
+})
 
 
 
