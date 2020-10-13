@@ -3,7 +3,7 @@ const fileIO = require('bozoid-file-grabber');
 
 exports.eventGroup = 'onMessage';
 exports.masterOnly = 'true';
-exports.command = 'delvocab';
+exports.commands = ['delvocab', 'dv'];
 exports.description = 'Remove vocabulary';
 exports.parameters = [
 	{

@@ -30,6 +30,12 @@ client.on('message', function(msg){
 
 			//Cascading checking section
 
+			
+			if(cmdModule.commands && cmdModule.commands.indexOf(parser.getCommand(msg.content)) < 0){
+				//console.log("Wrong command: " + cmdModule.commands + " != " + parser.getCommand(msg.content))
+				continue iterator
+			}	
+
 			if(cmdModule.command && cmdModule.command != parser.getCommand(msg.content)){
 				//console.log("Wrong command: " + cmdModule.command + " != " + parser.getCommand(msg.content));
 				continue iterator;
@@ -187,15 +193,13 @@ loader.loadFrom('./commands');
 
 
 client.login(bozoid.token).then(function(){
-
-
 	for(let schedModule of loader.commandStore.onSchedule){
 		let interval = schedModule.interval
 		if(!interval || interval < 100){
 			console.log("Bad schedule interval: " + interval + "?")
 			continue
 		}
-		console.log("Scheduled interval: " + interval)
+		console.log("Scheduled interval " + interval + "ms")
 		schedModule.timer = setInterval(function(){
 			schedModule.script(client)
 		}, interval);

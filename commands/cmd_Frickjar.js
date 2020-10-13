@@ -15,13 +15,13 @@ exports.script = function(cmd, msg){
 			fileIO.update("frickjar.json", function(json){
 				for(var listedUser of json.list){
 					if(listedUser.id == msg.author.id){
-						console.log("User already listed");
+						//console.log("User already listed");
 						justAdded = listedUser;
 						listedUser.total = (listedUser.total != undefined ? listedUser.total : 0) + 1;	//Add 1 to existing value or initialize it
 						return;
 					}
 				}
-				console.log("User not already listed");
+				//console.log("User not already listed");
 				justAdded = {
 					"id":msg.author.id,
 					"referenceName":msg.author.username + "#" +

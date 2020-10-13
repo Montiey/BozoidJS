@@ -3,7 +3,7 @@ const fileIO = require('bozoid-file-grabber');
 
 exports.eventGroup = 'onMessage';
 exports.masterOnly = 'true';
-exports.command = 'addvocab';
+exports.commands = ['addvocab', 'av']
 exports.description = 'Add vocabulary';
 exports.parameters = [
 	{
