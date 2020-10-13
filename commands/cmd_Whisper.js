@@ -2,7 +2,7 @@ const fileIO = require('bozoid-file-grabber')
 
 exports.eventGroup = "onSchedule";
 
-exports.interval = 1000*60*60*24
+exports.interval = 1000*60*60*4
 exports.timer = null
 
 exports.script = function(client){
@@ -16,19 +16,24 @@ exports.script = function(client){
 	console.log("Magic hat contains " + users.length + " users")
 
 	index = Math.floor(Math.random() * users.length)
-	//index = 97
 
 	console.log("Pulling from " + index)
 	
+	////////
 	chosen = users[index]
 
-	console.log("Pulled " + chosen.username + "#" + chosen.discriminator + " from the hat")
+	//chosen = client.guilds.find(g => g.name === "Testing123").members.find(m => m.user.username === "Montiey").user
+	////////
 
-	//if(chosen.username === "Montiey"){	//Testing safeguard
-		vocabList = fileIO.read('vocabulary.json').list
-		oStr = vocabList[Math.floor(Math.random() * vocabList.length)]
+	console.log("Pulled " + chosen.id + " aka " + chosen.username + "#" + chosen.discriminator + " from the hat")
 
-		console.log("[Whisper] Sending random message!")
-		chosen.send(oStr)
-	//}
+	vocabList = fileIO.read('vocabulary.json').list
+	oStr = vocabList[Math.floor(Math.random() * vocabList.length)]
+
+	console.log("[Whisper] Sending random message!")
+	chosen.send(oStr)
+
+	fileIO.update('whisperlog.json', function(json){
+		json.list.push((new Date()).toISOString() + " " + chosen.username + "#" + chosen.discriminator + " " + oStr)
+	})
 }
