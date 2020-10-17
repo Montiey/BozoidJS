@@ -21,17 +21,22 @@ exports.script = function(cmd, msg){
 	msg.channel.startTyping();
 
 	imgClient.search(parser.getFreestyle(msg.content, 0)).then(images => {
+		let succ = false
 		for(let test of images){
 			if(/(\.(git|jpg|jpeg|tiff|png)$)/.test(test.url)){
 				msg.channel.send({
 					file: test.url
 				});
-
-				msg.channel.stopTyping();
+				succ = true
 
 				break;
 			}
 		}
+		if(!succ){
+			msg.react("👎");
+		}
+		msg.channel.stopTyping();
+		console.log("Image Search finished.")
 	}).catch(err => {
 		console.log("Image Search Error: " + err)
 

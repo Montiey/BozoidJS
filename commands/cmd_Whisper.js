@@ -2,7 +2,7 @@ const fileIO = require('bozoid-file-grabber')
 
 exports.eventGroup = "onSchedule";
 
-exports.interval = 1000*60*60*4
+exports.interval = Math.floor(1000*60*60*24*7*8/210)
 exports.timer = null
 
 exports.script = function(client){
