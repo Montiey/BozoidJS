@@ -2,13 +2,30 @@ const fileIO = require('bozoid-file-grabber')
 
 exports.eventGroup = "onSchedule";
 
-exports.interval = Math.floor(1000*60*60*24*7*8/210)
+exports.interval = 1000*60*60*10
+//exports.interval = 1000*5
 exports.timer = null
 
 exports.script = function(client){
 	users = []
 	for(let g of client.guilds.array()){
 		for(let m of g.members.array()){
+			if(m.user.bot || m.user.id == client.user.id){
+				//console.log('Ineligible ' + m.user.username)
+				continue
+			}
+
+			let exists = false
+			for(let userEntry of users){
+				if(userEntry.id == m.user.id){
+					exists = true
+					//console.log('Duplicate for ' + m.user.username)
+				}
+			}
+			if(exists) continue
+			
+			//
+
 			users.push(m.user)
 		}
 	}
@@ -30,10 +47,9 @@ exports.script = function(client){
 	vocabList = fileIO.read('vocabulary.json').list
 	oStr = vocabList[Math.floor(Math.random() * vocabList.length)]
 
-	console.log("[Whisper] Sending random message!")
 	chosen.send(oStr)
 
 	fileIO.update('whisperlog.json', function(json){
-		json.list.push((new Date()).toISOString() + " " + chosen.username + "#" + chosen.discriminator + " " + oStr)
+		json.list.push((new Date()).toISOString() + " " + chosen.id + " " + chosen.username + "#" + chosen.discriminator + " " + oStr)
 	})
 }
