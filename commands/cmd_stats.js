@@ -14,12 +14,14 @@ exports.script = function(cmd, msg){
 	stat_vocabulary = fileIO.read('vocabulary.json').list.length
 
 
-	let numGuilds = msg.client.guilds.size
-	let numChannels = msg.client.channels.size
+	let numGuilds = 0
+	let numChannels = 0
 	let numUsers = 0
 
-	for(let g of msg.client.guilds.array()){
-		numUsers+= g.members.array().length
+	for(let g of msg.client.guilds.cache.array()){
+		numGuilds++
+		numChannels += g.channels.cache.array().length
+		numUsers += g.memberCount
 	}
 
 	bozAge = (new Date().getTime()) - (new Date('2018-01-25')).getTime()
@@ -27,15 +29,15 @@ exports.script = function(cmd, msg){
 	oStr = ''
 
 	oStr += 'Age: ' + '`' + Math.floor(bozAge / (1000*60*60*24)) + '` days\n'
-	oStr += 'Servers currently joined: `' + numGuilds + '`\n'
-	oStr += 'Channels currently monitored: `' + numChannels + '`\n'
-	oStr += 'Users currently monitored: `' + numUsers + '`\n'
-	oStr += 'Total users blacklisted: `' + stat_blacklist + '`\n'
-	oStr += 'Total users caught swearing: `' + stat_frickjar + '`\n'
+	oStr += 'Guilds: `' + numGuilds + '`\n'
+	oStr += 'Channels: `' + numChannels + '`\n'
+	oStr += 'Users: `' + numUsers + '`\n'
+	oStr += 'Users blacklisted: `' + stat_blacklist + '`\n'
+	oStr += 'Users who swore: `' + stat_frickjar + '`\n'
 	oStr += 'Known swears: `' + stat_fricks + '`\n'
 	oStr += 'Known vocabulary: `' + stat_vocabulary + '`\n'
 	oStr += 'Snappy responses: `' + stat_responder + '`\n'
-	oStr += 'Total users receiving VC notifications: `' + stat_voicemonitor + '`\n'
+	oStr += 'Voice channel DM Subscribers: `' + stat_voicemonitor + '`\n'
 
 	msg.channel.send(oStr)
 }

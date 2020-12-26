@@ -15,7 +15,7 @@ exports.parameters = [
 ];
 
 exports.script = function(cmd, msg){
-	msg.delete(0);
+	msg.delete({timeout:0});
 	
 	let maxSpams = 10;
 

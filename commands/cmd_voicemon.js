@@ -33,7 +33,7 @@ exports.script = function(cmd, msg){
 			newState = !lastState;
 			entry.notificationsEnabled = newState;
 
-			console.log("Changed notification state for " + msg.author.id + " " + lastState + " -> " + newState);
+			//console.log("Changed notification state for " + msg.author.id + " " + lastState + " -> " + newState);
 		}
 
 		msg.channel.send("Voicechat activity notifications " +

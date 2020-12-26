@@ -2,7 +2,8 @@ const parser = require('freestyle-parser');
 const zalgo = require('to-zalgo');
 
 exports.eventGroup = 'onMessage';
-exports.description = 'Zalgo generator';
+//exports.description = 'Zalgo generator'
+exports.description = 'b̾ͯ̅e̽̂̇h̍͗ͮȍ͞ͅlͩ̇̕d̈́͋͂,̀̒̒ ͨ̏̄y̿ͤ͌ó́̒ǔ̐ͩrͥ̽͟ ̅ͩ́dͭ͑ͬoͭ͑̈́o̔ͦ̓m͊ͩ́.̌ͦ͘'
 exports.allowBot = false;
 exports.command = 'zalgo';
 exports.parameters = [

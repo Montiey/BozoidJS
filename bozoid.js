@@ -1,3 +1,5 @@
+console.log('======== bozoid.js | BEGIN ========')
+
 global.__basedir = __dirname;	//Set __basedir to this directory (project root)
 
 const Discord = require('discord.js');
@@ -9,24 +11,43 @@ const parser = require("freestyle-parser");
 const loader = require('bozoid-command-loader');
 
 
-
-
 ////////
 client.on('message', function(msg){
 	try{
-		console.log(new Date().toISOString() + " (" +
-		(msg.member ? msg.member.guild : "<DM>") + ")[" +
-		(msg.member ? msg.channel.name : msg.channel.recipient.username + "#" +
-		msg.channel.recipient.discriminator) + "]<" +
-		msg.author.username + "#" + msg.author.discriminator + "> " +
-		msg.content);
+		isGuild = msg.guild ? true : false
+		//console.log("Processing message for " + msg.author.username)
+		//console.log("Is guild " + isGuild)
+
+		oStr = new Date().toISOString() + " (" +
+
+		(isGuild ? msg.guild.name : "<DM>") +
+
+		")[" +
+
+		(isGuild ? msg.channel.name : msg.channel.recipient.username + "#" + msg.channel.recipient.discriminator) +
+
+		"]<" + msg.author.username + "#" + msg.author.discriminator + "> " + msg.content
+
+		console.log(oStr)
+
+		if(msg.embeds.length){	//TODO: a way to put embeds in the logs?
+			//console.log('Message has embeds')
+			//msg.embeds.forEach(e => console.log(e))
+		}
+
+		if(msg.attachments.size){
+			//console.log('Message has attachments')
+			msg.attachments.each(a => console.log('[^ Attachment URL] ' + a.url))
+		}
+
 	} catch(e){
-		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
+		console.log(new Date().toISOString() + " Something happened:");
+		console.log(e)
 	}
 
 	(function(){
 		iterator: for(var cmdModule of loader.commandStore.onMessage){	//TODO: labels reeee
-			//console.log("Testing " + command.description);
+			//console.log("Testing " + cmdModule.description);
 
 			//Cascading checking section
 
@@ -61,7 +82,7 @@ client.on('message', function(msg){
 			if(cmdModule.parameters){
 				let incorrect = false;
 				if(cmdModule.parameters.length > parser.getArgs(msg.content).length) {
-					msg.delete(10000);
+					msg.delete({timeout:10000});
 					incorrect = true;
 				}
 
@@ -82,8 +103,8 @@ client.on('message', function(msg){
 					}
 				}
 				if(incorrect){
-					msg.channel.send("Incorrect parameters").then(msg => {
-						msg.delete(10000);
+					msg.channel.send("Incorrect parameters").then(m => {
+						m.delete({timeout:10000});
 					});
 					continue iterator;
 				}
@@ -104,15 +125,16 @@ client.on('message', function(msg){
 
 ////////
 
-client.on('voiceStateUpdate', function(oldMember, newMember){
+client.on('voiceStateUpdate', function(oldState, newState){
 	try{
-		//console.log(new Date().toISOString() + " (" + newMember.id + ")<" + newMember.user.username + "#" + newMember.user.discriminator + "> Voice Update");	
+		//console.log(new Date().toISOString() + " (" + newState.id + ")<" + newState.member.user.username + "#" + newState.member.user.discriminator + "> Voice Update");	
 	} catch(e){
-		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
+		console.log(new Date().toISOString() + " Something happened:");
+		console.log(e)
 	}
 
 	for(var cmdModule of loader.commandStore.onVoiceStatusUpdate){
-		cmdModule.script(cmdModule, oldMember, newMember);
+		cmdModule.script(cmdModule, oldState, newState);
 	}
 });
 
@@ -123,36 +145,23 @@ client.on('voiceStateUpdate', function(oldMember, newMember){
 
 let presenceGuildStore = {};
 
-client.on('presenceUpdate', function(oldMember, newMember){
+client.on('presenceUpdate', function(oldPresence, newPresence){
 	try{
-		//console.log(new Date().toISOString() + " (" + newMember.id + ")<" + newMember.user.username + "#" + newMember.user.discriminator + "> Presence Update");
+		//console.log(new Date().toISOString() + " (" + newPresence.user.id + ")<" + newPresence.user.username + "#" + newPresence.user.discriminator + "> Presence Update");
 	} catch(e){
-		console.log(new Date().toISOString() + " Something happened:\n" + JSON.stringify(e));
+		console.log(new Date().toISOString() + " Something happened:");
+		console.log(e)
+	
 	}
 
+	if(newPresence.status == presenceGuildStore[newPresence.user.id]) return;	//TODO: This invalidates all use cases that depend on a guild in context to a presence update, in favor of emulating a single presence update without a practical guild relation.
 
-	if(newMember.presence.status == presenceGuildStore[newMember.id]) return;	//TODO: This invalidates all use cases that depend on a guild in context to a presence update, in favor of emulating a single presence update without a practical guild relation.
-
-	presenceGuildStore[newMember.id] = newMember.presence.status;
+	presenceGuildStore[newPresence.user.id] = newPresence.status;
 
 	for(let cmdModule of loader.commandStore.onPresenceUpdate){
-		cmdModule.script(cmdModule, oldMember, newMember);
+		cmdModule.script(cmdModule, oldPresence, newPresence);
 	}
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ////////////
 
@@ -185,25 +194,64 @@ client.on('ready', () => {
 });
 
 
-loader.loadFrom('./commands');
 
+///
+loader.loadFrom('./commands');
+///
 
 
 
 
 
 client.login(bozoid.token).then(function(){
+	let now = (new Date()).getTime()
+
 	for(let schedModule of loader.commandStore.onSchedule){
 		let interval = schedModule.interval
-		if(!interval || interval < 100){
+
+		if(!interval || interval < 100){	//Don't be stupid, stupid
 			console.log("Bad schedule interval: " + interval + "?")
 			continue
 		}
-		console.log("Scheduled interval " + interval + "ms")
+
+		console.log("Scheduled interval " + interval + "ms for " + schedModule.name)
+
 		schedModule.timer = setInterval(function(){
 			schedModule.script(client)
 		}, interval);
 	}
+
+	let readJSON = fileIO.read('restartInfo.json')
+	let triggerChannelID = readJSON.triggerChannelID
+	let restartSuccessTag = readJSON.restartSuccessTag
+
+	//console.log("Checking for status silence tag: " + restartSuccessTag + " @ " + triggerChannelID)
+
+	if(!restartSuccessTag && triggerChannelID)
+	client.channels.fetch(triggerChannelID).then(channel => {
+		
+		fileIO.update('restartInfo.json', function(json){
+			channel.send('Restarted, loaded `' + loader.numLoadedModules + '` modules')
+
+			if(loader.numErroredModules){
+				channel.send("**Couldn't load `" + loader.numErroredModules + '` module(s):**')
+
+				let oStr = '```'
+				for(let erroredModuleName of loader.erroredModules){
+					oStr += erroredModuleName + "\n"
+				}
+
+				oStr += '```'
+
+				channel.send(oStr)
+			}
+
+			//At this point nothing went wrong, tag the info file with success, don't send anything else
+			json.restartSuccessTag = true
+			json.triggerChannelID = null	//TODO: shouldn't need, but eliminates chances of spam due to boot loop
+		})
+		
+	})
 })
 
 

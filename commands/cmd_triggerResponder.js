@@ -7,7 +7,7 @@ exports.script = function(cmd, msg){
 	let json = fileIO.read('responder.json');
 	
 	if(json.list) for(let set of json.list){
-		if(msg.content.toLowerCase().includes(set.trigger)){
+		if(msg.cleanContent.toLowerCase().includes(set.trigger)){
 			msg.channel.send(set.response);
 			break;
 		}

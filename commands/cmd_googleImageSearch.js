@@ -23,12 +23,11 @@ exports.script = function(cmd, msg){
 	imgClient.search(parser.getFreestyle(msg.content, 0)).then(images => {
 		let succ = false
 		for(let test of images){
-			if(/(\.(git|jpg|jpeg|tiff|png)$)/.test(test.url)){
+			if(/(\.(gif|jpg|jpeg|tiff|png)$)/.test(test.url)){
 				msg.channel.send({
-					file: test.url
-				});
+					files: [test.url]
+				}).catch(e => console.log(e))
 				succ = true
-
 				break;
 			}
 		}
