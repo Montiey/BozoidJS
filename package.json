@@ -21,7 +21,6 @@
     "pm2": "^4.5.1",
     "to-zalgo": "^1.0.1"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

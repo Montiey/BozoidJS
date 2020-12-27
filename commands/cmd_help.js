@@ -15,7 +15,7 @@ exports.script = function(cmd, msg){
 
 	//msg.channel.send("**Important:** *BozoidJS is currently broken as of October 28th, 2020 due to an API update. Fix will be implemented slowly, or maybe never.*")
 
-	for(var command of loader.commandStore.onMessage){
+	for(var command of loader.moduleStore.onMessage){
 		if(command.noHelp || (command.masterOnly && !showAll)) continue;
 		var cmdStr = "";
 
@@ -30,9 +30,9 @@ exports.script = function(cmd, msg){
 		if(command.parameters){
 			for(var p of command.parameters){
 				if(p.input){
-					cmdStr += ' ' + p.description;
+					cmdStr += ' [' + p.description + ']';
 				} else{
-					cmdStr += ' ' + p.keyword;
+					cmdStr += ' <' + p.keyword + '>';
 				}
 			}
 		}

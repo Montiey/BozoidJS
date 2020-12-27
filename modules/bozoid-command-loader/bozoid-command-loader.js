@@ -1,9 +1,9 @@
 const fs = require('fs');
 
-exports.commandStore = {
+exports.moduleStore = {
 	"onMessage":[],
 	"onPresenceUpdate":[],
-	"onVoiceStatusUpdate":[],
+	"onVoiceStateUpdate":[],
 	"onSchedule":[]
 };
 
@@ -18,7 +18,7 @@ exports.loadFrom = function(loadDir){
 	fs.readdirSync(realDir).filter(file => /^cmd_.*\.js$/.test(file)).forEach(function(file){
 		try{
 			let cmdModule = require(realDir + '/' + file);
-			exports.commandStore[cmdModule.eventGroup].push(cmdModule);
+			exports.moduleStore[cmdModule.eventGroup].push(cmdModule);
 			exports.numLoadedModules++
 			//console.log("Loaded [" + cmdModule.eventGroup + "] " + file)
 		} catch(e){

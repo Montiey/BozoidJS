@@ -36,8 +36,7 @@ client.on('message', function(msg){
 		}
 
 		if(msg.attachments.size){
-			//console.log('Message has attachments')
-			msg.attachments.each(a => console.log('[^ Attachment URL] ' + a.url))
+			msg.attachments.forEach(a => console.log('[^ Attachment URL] ' + a.url))	//TODO: This should be a collection, but .each() is not a function???
 		}
 
 	} catch(e){
@@ -46,7 +45,7 @@ client.on('message', function(msg){
 	}
 
 	(function(){
-		iterator: for(var cmdModule of loader.commandStore.onMessage){	//TODO: labels reeee
+		iterator: for(var cmdModule of loader.moduleStore.onMessage){	//TODO: labels reeee
 			//console.log("Testing " + cmdModule.description);
 
 			//Cascading checking section
@@ -133,7 +132,7 @@ client.on('voiceStateUpdate', function(oldState, newState){
 		console.log(e)
 	}
 
-	for(var cmdModule of loader.commandStore.onVoiceStatusUpdate){
+	for(var cmdModule of loader.moduleStore.onVoiceStateUpdate){
 		cmdModule.script(cmdModule, oldState, newState);
 	}
 });
@@ -158,7 +157,7 @@ client.on('presenceUpdate', function(oldPresence, newPresence){
 
 	presenceGuildStore[newPresence.user.id] = newPresence.status;
 
-	for(let cmdModule of loader.commandStore.onPresenceUpdate){
+	for(let cmdModule of loader.moduleStore.onPresenceUpdate){
 		cmdModule.script(cmdModule, oldPresence, newPresence);
 	}
 });
@@ -204,9 +203,7 @@ loader.loadFrom('./commands');
 
 
 client.login(bozoid.token).then(function(){
-	let now = (new Date()).getTime()
-
-	for(let schedModule of loader.commandStore.onSchedule){
+	for(let schedModule of loader.moduleStore.onSchedule){
 		let interval = schedModule.interval
 
 		if(!interval || interval < 100){	//Don't be stupid, stupid
@@ -220,38 +217,47 @@ client.login(bozoid.token).then(function(){
 			schedModule.script(client)
 		}, interval);
 	}
-
+}).then(function(){
+	let now = (new Date()).getTime()
+	fileIO.update('restartLog.json', function(json){
+		json.list.push({
+			time:now,
+			numLoadedModules:loader.numLoadedModules,
+			numErroredModules:loader.numErroredModules
+		})
+	})
+}).then(function(){	//Respond to the restart command in channel (if applicable)
 	let readJSON = fileIO.read('restartInfo.json')
 	let triggerChannelID = readJSON.triggerChannelID
 	let restartSuccessTag = readJSON.restartSuccessTag
 
 	//console.log("Checking for status silence tag: " + restartSuccessTag + " @ " + triggerChannelID)
 
-	if(!restartSuccessTag && triggerChannelID)
-	client.channels.fetch(triggerChannelID).then(channel => {
-		
-		fileIO.update('restartInfo.json', function(json){
-			channel.send('Restarted, loaded `' + loader.numLoadedModules + '` modules')
+	if(!restartSuccessTag && triggerChannelID){
+		client.channels.fetch(triggerChannelID).then(channel => {
+			
+			fileIO.update('restartInfo.json', function(json){
+				channel.send('Restarted, loaded `' + loader.numLoadedModules + '` modules')
 
-			if(loader.numErroredModules){
-				channel.send("**Couldn't load `" + loader.numErroredModules + '` module(s):**')
+				if(loader.numErroredModules){
+					channel.send("**Couldn't load `" + loader.numErroredModules + '` module(s):**')
 
-				let oStr = '```'
-				for(let erroredModuleName of loader.erroredModules){
-					oStr += erroredModuleName + "\n"
+					let oStr = '```'
+					for(let erroredModuleName of loader.erroredModules){
+						oStr += erroredModuleName + "\n"
+					}
+
+					oStr += '```'
+
+					channel.send(oStr)
 				}
 
-				oStr += '```'
-
-				channel.send(oStr)
-			}
-
-			//At this point nothing went wrong, tag the info file with success, don't send anything else
-			json.restartSuccessTag = true
-			json.triggerChannelID = null	//TODO: shouldn't need, but eliminates chances of spam due to boot loop
+				//At this point nothing went wrong, tag the info file with success, don't send anything else
+				json.restartSuccessTag = true
+				json.triggerChannelID = null	//TODO: shouldn't need, but eliminates chances of spam due to boot loop
+			})
 		})
-		
-	})
+	}
 })
 
 

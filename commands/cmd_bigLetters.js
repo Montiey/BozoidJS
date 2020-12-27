@@ -12,7 +12,7 @@ exports.parameters = [
 ];
 
 exports.script = function(cmd, msg){
-	msg.delete(0);
+	msg.delete({timeout:0});
 	let str = parser.getFreestyle(msg.content, 0).toLowerCase().match(/[a-z0-9]/g).join("");
 
 	let oStr = "";

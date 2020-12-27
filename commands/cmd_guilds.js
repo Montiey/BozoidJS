@@ -8,17 +8,16 @@ exports.masterOnly = true
 exports.allowBot = false
 
 exports.script = function(cmd, msg){
-	oStr = 'Current guilds (' + msg.client.guilds.cache.array().length + '):\n```'
+	oStr = 'Current guilds (' + msg.client.guilds.cache.size + '):\n```'
 
-	for(let guild of msg.client.guilds.cache.array()){
+	msg.client.guilds.cache.each(guild => {
 		let owner = guild.member(guild.ownerID).user
 		let joinDate = (new moment(guild.joinedAt)).format('YYYY-MM-DD')
 
 		//oStr += 'x' + guild.memberCount + ' ' + guild.id + ' ' + guild.name + ' - ' + owner.username + '#' + owner.discriminator + ' at ' + joinDate + '\n'
 		oStr += joinDate + ' x' + guild.memberCount + ' ' + guild.name + ' - ' + owner.username + '#' + owner.discriminator + '\n'
-	}
-
-	oStr += '```'
-
-	msg.channel.send(oStr)
+	}).tap(() => {
+		oStr += '```'
+		msg.channel.send(oStr)
+	})
 }

@@ -14,7 +14,7 @@ exports.parameters = [
 ];
 
 exports.script = function(cmd, msg){
-	msg.delete(0);
+	msg.delete({timeout:0});
 	msg.channel.send(zalgo(parser.getFreestyle(msg.content, 0)));
 
 }

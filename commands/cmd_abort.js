@@ -25,7 +25,7 @@ exports.script = function(cmd, msg){
 		limit: 100
 	}).then(
 		messages => messages.filter(msg => msg.author.id === msg.client.user.id).tap(candidateMessages => {
-			console.log(candidateMessages.array().length + " candidate messages")
+			console.log(candidateMessages.size + " candidate messages")
 			for(msgToDelete of candidateMessages.first(numToDelete)){
 				console.log("Deleting " + msgToDelete.id)
 				msgToDelete.delete()

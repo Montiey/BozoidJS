@@ -12,7 +12,7 @@ exports.parameters = [
 ];
 
 exports.script = function(cmd, msg){
-	msg.delete(0);
+	msg.delete({timeout:0});
 	
 	table = [
 		"a4", "b6", "e3", "g9", "i1", "l1", "o0", "s5", "t7"

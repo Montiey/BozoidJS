@@ -1,6 +1,6 @@
 const fileIO = require('bozoid-file-grabber');
 
-exports.eventGroup = 'onVoiceStatusUpdate';
+exports.eventGroup = 'onVoiceStateUpdate';
 exports.script = function(cmd, oldState, newState){	//Voice channel activity tracker and notifier
 	let now = (new Date).getTime();
 
@@ -9,7 +9,7 @@ exports.script = function(cmd, oldState, newState){	//Voice channel activity tra
 	//let timeInterval = 0
 	let deleteDelay = 30*60*1000;
 
-	let numPeople = 0
+	let numPeople = null
 
 	if(oldState.channel){
 		//console.log('User was already in a channel')
@@ -26,7 +26,8 @@ exports.script = function(cmd, oldState, newState){	//Voice channel activity tra
 
 	fileIO.update("voicemonitor.json", function(json){
 		for(let receivingMember of json.list){	//Every member that may receive a DM
-			if(!receivingMember.notificationsEnabled) continue	//Isn't set to be notified
+			if(!receivingMember.guildPreferences[newState.guild.id]) continue	//Notifications not enabled for this guild
+
 			if(now - receivingMember.lastCheckTime <= timeInterval) continue	//Was notified too recently
 
 			let guildMember = newState.guild.member(receivingMember.id);
