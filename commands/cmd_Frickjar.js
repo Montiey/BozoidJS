@@ -32,7 +32,7 @@ exports.script = function(cmd, msg){
 				json.list.push(justAdded)
 			});
 
-			if(justAdded.total % 5 == 0) msg.channel.send("You said: `" + frick +
+			if(justAdded.total % 10 == 0) msg.channel.send("You said: `" + frick +
 				"`!\nFrick Jar™ total for `" + justAdded.referenceName + "` is `$" +
 				justAdded.total + "`");
 
