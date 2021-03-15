@@ -2,7 +2,7 @@ const loader = require('bozoid-command-loader')
 
 exports.eventGroup = 'onMessage'
 exports.command = 'listmodules'
-
+exports.description = 'List all modules & status'
 
 function makeString(inStr, text){
 	let addStr = '`' + text + '` '

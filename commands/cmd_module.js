@@ -7,7 +7,7 @@ exports.masterOnly = true
 exports.parameters = [
 	{
 		input:true,
-		description:'up / down'
+		description:'enable / disable'
 	}
 ]
 

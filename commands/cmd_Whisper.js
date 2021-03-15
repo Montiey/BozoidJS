@@ -3,7 +3,8 @@ const fileIO = require('bozoid-file-grabber')
 exports.eventGroup = "onSchedule";
 exports.name = "Whisper"
 
-exports.interval = 1000*60*60*5
+//exports.interval = 1000*60*60*9
+exports.interval = 1000*60*60*24
 //exports.interval = 1000*60*1
 //exports.interval = 1000*10
 exports.timer = null
