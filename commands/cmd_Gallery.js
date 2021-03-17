@@ -11,7 +11,7 @@ exports.noHelp = true;
 
 
 const path = __basedir + '/' + bozoid.galleryPath
-const maxSize = 512*1000*1000	//Maximum size of gallery directory in bytes
+const maxSize = 256*1000*1000	//Maximum size of gallery directory in bytes
 
 
 function pruneGallery(){
